@@ -1,7 +1,8 @@
 
-import VideoPlayer from "~/components/video-player"
 
+import VideoPlayer from "~/components/video-player"
 export default function Dashboard() {
-  return <VideoPlayer
-        />
+  return (
+    <VideoPlayer />
+  )
 }

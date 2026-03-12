@@ -40,8 +40,10 @@ export default function VideoList() {
       { label: "Videos" }
     ]}/>
       <div className="flex-1 p-6 w-full">
-      <div className="flex justify-between items-center mb-4">
-       <Button asChild className="bg-blue-600 text-white rounded hover:bg-blue-700">
+      <div className="flex justify-end items-center mb-4">
+        
+
+       <Button asChild className="bg-blue-600 text-white rounded hover:bg-blue-700 ">
       <Link to="/videos/create">+ Create Video</Link>
     </Button>
        

@@ -4,6 +4,8 @@ import { getVideos, deleteVideo } from "~/lib/videoService";
 import type { Video } from "~/lib/videoService";
 import { VideoTable } from "~/components/videos/VideoTable";
 import { useToast } from "~/components/ui/toast";
+import { SiteHeader } from "~/components/site-header";
+import { Button } from "~/components/ui/button";
 
 export default function VideoList() {
   const [videos, setVideos] = React.useState<Video[]>([]);
@@ -32,14 +34,17 @@ export default function VideoList() {
 
   return (
     <div>
+      <SiteHeader 
+      breadcrumbs={[
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Videos" }
+    ]}/>
+      <div className="flex-1 p-6 w-full">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Videos</h1>
-        <Link
-          to="/videos/create"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          + Create Video
-        </Link>
+       <Button asChild className="bg-blue-600 text-white rounded hover:bg-blue-700">
+      <Link to="/videos/create">+ Create Video</Link>
+    </Button>
+       
       </div>
       <VideoTable
         videos={videos}
@@ -47,6 +52,7 @@ export default function VideoList() {
         onEdit={(id) => navigate(`/videos/${id}/edit`)}
         onDelete={handleDelete}
       />
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { createVideo } from "~/lib/videoService";
 import { VideoForm } from "~/components/videos/VideoForm";
 import { useToast } from "~/components/ui/toast";
+import { SiteHeader } from "~/components/site-header";
 
 export default function CreateVideo() {
   const navigate = useNavigate();
@@ -16,8 +17,16 @@ export default function CreateVideo() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-4">Create Video</h1>
+      <SiteHeader 
+            breadcrumbs={[
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Videos", href: "/videos" },
+            { label: "Create Video" }
+          ]}/>
+          <div className="flex-1 p-6 w-full">
+
       <VideoForm onSubmit={handleSubmit} onCancel={() => navigate("/videos")} />
+          </div>
     </div>
   );
 }

@@ -1,30 +1,49 @@
-import { Button } from "~/components/ui/button"
-import { Separator } from "~/components/ui/separator"
+import { NavLink } from "react-router"
 import { SidebarTrigger } from "~/components/ui/sidebar"
 
-export function SiteHeader() {
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "~/components/ui/breadcrumb"
+
+type BreadcrumbItemType = {
+  label: string
+  href?: string
+}
+
+type SiteHeaderProps = {
+  breadcrumbs: BreadcrumbItemType[]
+}
+
+export function SiteHeader({ breadcrumbs }: SiteHeaderProps) {
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
-      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-        <SidebarTrigger className="-ml-1" />
-        <Separator
-          orientation="vertical"
-          className="mx-2 data-[orientation=vertical]:h-4"
-        />
-        <h1 className="text-base font-medium">Documents</h1>
-        <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-            <a
-              href="https://github.com/shadcn-ui/ui/tree/main/apps/v4/app/(examples)/dashboard"
-              rel="noopener noreferrer"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              GitHub
-            </a>
-          </Button>
-        </div>
-      </div>
+    <header className="h-14 flex items-center border-b px-4 gap-3">
+      <SidebarTrigger />
+
+      <Breadcrumb>
+        <BreadcrumbList>
+          {breadcrumbs.map((item, index) => (
+            <span key={index} className="flex items-center gap-2">
+              
+              <BreadcrumbItem>
+                {item.href ? (
+                  <BreadcrumbLink asChild>
+                    <NavLink to={item.href}>{item.label}</NavLink>
+                  </BreadcrumbLink>
+                ) : (
+                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                )}
+              </BreadcrumbItem>
+
+              {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+            </span>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
     </header>
   )
 }

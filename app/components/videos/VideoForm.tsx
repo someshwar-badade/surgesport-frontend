@@ -1,64 +1,63 @@
-import * as React from "react";
-import type { Video } from "~/lib/videoService";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Field } from "~/components/ui/field";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
+import * as React from "react"
+import type { Video } from "~/lib/videoService"
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
+import { Field } from "~/components/ui/field"
+import { Input } from "~/components/ui/input"
+import { Button } from "~/components/ui/button"
 
 interface VideoFormProps {
-  readonly initialData?: Partial<Video>;
-  readonly onSubmit: (data: Omit<Video, "id" | "createdAt">) => void;
-  readonly onCancel?: () => void;
+  readonly initialData?: Partial<Video>
+  readonly onSubmit: (data: Omit<Video, "id" | "createdAt">) => void
+  readonly onCancel?: () => void
 }
 
-const PROCEDURE_OPTIONS = [
-  "Type A",
-  "Type B",
-  "Type C",
-  "Other",
-];
+const PROCEDURE_OPTIONS = ["Type A", "Type B", "Type C", "Other"]
 
-export function VideoForm({ initialData = {}, onSubmit, onCancel }: VideoFormProps) {
-  const [videoId, setVideoId] = React.useState(initialData.video_id || "");
+export function VideoForm({
+  initialData = {},
+  onSubmit,
+  onCancel,
+}: VideoFormProps) {
+  const [videoId, setVideoId] = React.useState(initialData.video_id || "")
   const [procedureType, setProcedureType] = React.useState(
     initialData.procedure_type || PROCEDURE_OPTIONS[0]
-  );
+  )
   const [totalVideoTime, setTotalVideoTime] = React.useState(
     initialData.total_video_time || ""
-  );
+  )
   const [firstEntry, setFirstEntry] = React.useState(
     initialData.first_camera_entry_time || ""
-  );
+  )
   const [finalExit, setFinalExit] = React.useState(
     initialData.final_camera_exit_time || ""
-  );
+  )
   const [exitBodyTime, setExitBodyTime] = React.useState(
     initialData.camera_exit_body_time || ""
-  );
+  )
   const [enterBodyTime, setEnterBodyTime] = React.useState(
     initialData.camera_enter_body_timestamp || ""
-  );
+  )
   const [exitBodyTimestamp, setExitBodyTimestamp] = React.useState(
     initialData.camera_exit_body_timestamp || ""
-  );
+  )
   const [osatScore, setOsatScore] = React.useState(
     initialData.osat_score?.toString() || ""
-  );
+  )
 
-  const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [errors, setErrors] = React.useState<Record<string, string>>({})
 
   const validate = () => {
-    const errs: Record<string, string> = {};
-    if (!videoId) errs.video_id = "Video ID is required";
-    if (!totalVideoTime) errs.total_video_time = "Total video time is required";
-    if (!osatScore) errs.osat_score = "OSAT score is required";
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
+    const errs: Record<string, string> = {}
+    if (!videoId) errs.video_id = "Video ID is required"
+    if (!totalVideoTime) errs.total_video_time = "Total video time is required"
+    if (!osatScore) errs.osat_score = "OSAT score is required"
+    setErrors(errs)
+    return Object.keys(errs).length === 0
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+    e.preventDefault()
+    if (!validate()) return
     onSubmit({
       video_id: videoId,
       procedure_type: procedureType,
@@ -69,19 +68,21 @@ export function VideoForm({ initialData = {}, onSubmit, onCancel }: VideoFormPro
       camera_enter_body_timestamp: enterBodyTime,
       camera_exit_body_timestamp: exitBodyTimestamp,
       osat_score: Number(osatScore),
-    });
-  };
+    })
+  }
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card className="mx-auto w-full max-w-4xl">
       <CardHeader>
         <CardTitle>Video Details</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Field>
-              <label htmlFor="videoId" className="text-sm font-medium">Video ID</label>
+              <label htmlFor="videoId" className="text-sm font-medium">
+                Video ID
+              </label>
               <Input
                 id="videoId"
                 type="text"
@@ -90,7 +91,7 @@ export function VideoForm({ initialData = {}, onSubmit, onCancel }: VideoFormPro
                 placeholder="Enter video ID"
               />
               {errors.video_id && (
-                <p className="text-red-500 text-xs mt-1">{errors.video_id}</p>
+                <p className="mt-1 text-xs text-red-500">{errors.video_id}</p>
               )}
             </Field>
 
@@ -118,12 +119,16 @@ export function VideoForm({ initialData = {}, onSubmit, onCancel }: VideoFormPro
                 onChange={(e) => setTotalVideoTime(e.target.value)}
               />
               {errors.total_video_time && (
-                <p className="text-red-500 text-xs mt-1">{errors.total_video_time}</p>
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.total_video_time}
+                </p>
               )}
             </Field>
 
             <Field>
-              <label className="text-sm font-medium">First Camera Entry Time</label>
+              <label className="text-sm font-medium">
+                First Camera Entry Time
+              </label>
               <Input
                 type="datetime-local"
                 value={firstEntry}
@@ -132,7 +137,9 @@ export function VideoForm({ initialData = {}, onSubmit, onCancel }: VideoFormPro
             </Field>
 
             <Field>
-              <label className="text-sm font-medium">Final Camera Exit Time</label>
+              <label className="text-sm font-medium">
+                Final Camera Exit Time
+              </label>
               <Input
                 type="datetime-local"
                 value={finalExit}
@@ -141,7 +148,9 @@ export function VideoForm({ initialData = {}, onSubmit, onCancel }: VideoFormPro
             </Field>
 
             <Field>
-              <label className="text-sm font-medium">Camera Exit Body Time</label>
+              <label className="text-sm font-medium">
+                Camera Exit Body Time
+              </label>
               <Input
                 type="datetime-local"
                 value={exitBodyTime}
@@ -150,7 +159,9 @@ export function VideoForm({ initialData = {}, onSubmit, onCancel }: VideoFormPro
             </Field>
 
             <Field>
-              <label className="text-sm font-medium">Camera Enter Body Timestamp</label>
+              <label className="text-sm font-medium">
+                Camera Enter Body Timestamp
+              </label>
               <Input
                 type="datetime-local"
                 value={enterBodyTime}
@@ -159,7 +170,9 @@ export function VideoForm({ initialData = {}, onSubmit, onCancel }: VideoFormPro
             </Field>
 
             <Field>
-              <label className="text-sm font-medium">Camera Exit Body Timestamp</label>
+              <label className="text-sm font-medium">
+                Camera Exit Body Timestamp
+              </label>
               <Input
                 type="datetime-local"
                 value={exitBodyTimestamp}
@@ -178,12 +191,12 @@ export function VideoForm({ initialData = {}, onSubmit, onCancel }: VideoFormPro
                 placeholder="0-100"
               />
               {errors.osat_score && (
-                <p className="text-red-500 text-xs mt-1">{errors.osat_score}</p>
+                <p className="mt-1 text-xs text-red-500">{errors.osat_score}</p>
               )}
             </Field>
           </div>
 
-          <div className="flex gap-4 justify-end">
+          <div className="flex justify-end gap-4">
             {onCancel && (
               <Button type="button" variant="outline" onClick={onCancel}>
                 Cancel
@@ -194,5 +207,5 @@ export function VideoForm({ initialData = {}, onSubmit, onCancel }: VideoFormPro
         </form>
       </CardContent>
     </Card>
-  );
+  )
 }

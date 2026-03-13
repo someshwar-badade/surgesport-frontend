@@ -1,5 +1,5 @@
-import * as React from "react";
-import type { Video } from "~/lib/videoService";
+import * as React from "react"
+import type { Video } from "~/lib/videoService"
 import {
   Table,
   TableHeader,
@@ -7,47 +7,53 @@ import {
   TableRow,
   TableHead,
   TableCell,
-} from "~/components/ui/table";
+} from "~/components/ui/table"
 
 interface VideoTableProps {
-  readonly videos: Video[];
-  readonly onView?: (id: string) => void;
-  readonly onEdit?: (id: string) => void;
-  readonly onDelete?: (id: string) => void;
+  readonly videos: Video[]
+  readonly onView?: (id: string) => void
+  readonly onEdit?: (id: string) => void
+  readonly onDelete?: (id: string) => void
 }
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 5
 
-export function VideoTable({ videos, onView, onEdit, onDelete }: VideoTableProps) {
-  const [search, setSearch] = React.useState("");
-  const [page, setPage] = React.useState(1);
+export function VideoTable({
+  videos,
+  onView,
+  onEdit,
+  onDelete,
+}: VideoTableProps) {
+  const [search, setSearch] = React.useState("")
+  const [page, setPage] = React.useState(1)
 
   const filtered = React.useMemo(() => {
-    return videos.filter((v) =>
-      v.video_id.toLowerCase().includes(search.toLowerCase()) ||
-      v.procedure_type.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [search, videos]);
+    return videos.filter(
+      (v) =>
+        v.video_id.toLowerCase().includes(search.toLowerCase()) ||
+        v.procedure_type.toLowerCase().includes(search.toLowerCase())
+    )
+  }, [search, videos])
 
   const paged = React.useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, page]);
+    const start = (page - 1) * PAGE_SIZE
+    return filtered.slice(start, start + PAGE_SIZE)
+  }, [filtered, page])
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <input
           type="text"
           placeholder="Search..."
           value={search}
           onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
+            setSearch(e.target.value)
+            setPage(1)
           }}
-          className="border rounded px-2 py-1 w-1/3"
+          className="w-1/3 rounded border px-2 py-1"
         />
         <div className="text-sm text-gray-600">
           Page {page} / {totalPages}
@@ -110,18 +116,18 @@ export function VideoTable({ videos, onView, onEdit, onDelete }: VideoTableProps
         <button
           disabled={page <= 1}
           onClick={() => setPage((p) => Math.max(1, p - 1))}
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          className="rounded bg-gray-200 px-3 py-1 disabled:opacity-50"
         >
           Previous
         </button>
         <button
           disabled={page >= totalPages}
           onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          className="rounded bg-gray-200 px-3 py-1 disabled:opacity-50"
         >
           Next
         </button>
       </div>
     </div>
-  );
+  )
 }

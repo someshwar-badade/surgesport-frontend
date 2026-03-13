@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Button } from "~/components/ui/button"
 import { Badge } from "~/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table"
 
 type CaptureData = {
   time: number
@@ -89,21 +90,22 @@ export function AnnotationDetails({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="phases" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="phases">
-              Phases ({getAnnotationsByCategory("phases").length})
-            </TabsTrigger>
-            <TabsTrigger value="events">
-              Events ({getAnnotationsByCategory("events").length})
-            </TabsTrigger>
-            <TabsTrigger value="bleeds">
-              Bleeds ({getAnnotationsByCategory("bleeds").length})
-            </TabsTrigger>
-            <TabsTrigger value="instrumentation">
-              Instrumentation (
-              {getAnnotationsByCategory("instrumentation").length})
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto">
+            <TabsList className="inline-flex h-10 w-max min-w-full items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
+              <TabsTrigger value="phases" className="whitespace-nowrap">
+                Phases ({getAnnotationsByCategory("phases").length})
+              </TabsTrigger>
+              <TabsTrigger value="events" className="whitespace-nowrap">
+                Events ({getAnnotationsByCategory("events").length})
+              </TabsTrigger>
+              <TabsTrigger value="bleeds" className="whitespace-nowrap">
+                Bleeds ({getAnnotationsByCategory("bleeds").length})
+              </TabsTrigger>
+              <TabsTrigger value="instrumentation" className="whitespace-nowrap">
+                Instrumentation ({getAnnotationsByCategory("instrumentation").length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {(["phases", "events", "bleeds", "instrumentation"] as const).map(
             (category) => (
@@ -169,33 +171,43 @@ export function AnnotationDetails({
                     <h3 className="font-semibold">
                       Saved {getCategoryLabel(category)} Annotations
                     </h3>
-                    <div className="max-h-64 space-y-2 overflow-y-auto">
-                      {getAnnotationsByCategory(category).map(
-                        (annotation, index) => (
-                          <div
-                            key={annotation.id}
-                            className="rounded border bg-gray-50 p-3 dark:bg-gray-900"
-                          >
-                            <div className="mb-2 flex items-center justify-between">
-                              <Badge className={getCategoryColor(category)}>
-                                {getCategoryLabel(category)} #{index + 1}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(
-                                  annotation.timestamp
-                                ).toLocaleTimeString()}
-                              </span>
-                            </div>
-                            <div className="text-sm">
-                              <div>Time: {annotation.time.toFixed(2)}s</div>
-                              <div>
-                                Position: ({annotation.xPercent.toFixed(1)}%,{" "}
-                                {annotation.yPercent.toFixed(1)}%)
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      )}
+                    <div className="max-h-64 overflow-y-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-12">#</TableHead>
+                            <TableHead>Time</TableHead>
+                            <TableHead>Position</TableHead>
+                            <TableHead>Created</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {getAnnotationsByCategory(category).map(
+                            (annotation, index) => (
+                              <TableRow key={annotation.id}>
+                                <TableCell>
+                                  <Badge
+                                    variant="secondary"
+                                    className={getCategoryColor(category)}
+                                  >
+                                    {index + 1}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="font-mono text-xs">
+                                  {annotation.time.toFixed(2)}s
+                                </TableCell>
+                                <TableCell className="font-mono text-xs">
+                                  ({annotation.xPercent.toFixed(1)}%,{" "}
+                                  {annotation.yPercent.toFixed(1)}%)
+                                </TableCell>
+                                <TableCell className="text-xs text-muted-foreground">
+                                  {new Date(annotation.timestamp).toLocaleTimeString()}
+                                </TableCell>
+                              </TableRow>
+                            )
+                          )}
+                        </TableBody>
+                      </Table>
                     </div>
                   </div>
                 )}

@@ -41,7 +41,7 @@ export default function Annotation() {
       />
 
       <div className="w-full flex-1 p-6">
-        <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-[25%_50%_25%]">
+        <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-[20%_50%_30%]">
           {/* Video Details Column */}
           <div>
             <VideoDetails video={mockVideo} />

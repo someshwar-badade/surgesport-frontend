@@ -19,7 +19,7 @@ export default function Annotation() {
     camera_enter_body_timestamp: "",
     camera_exit_body_timestamp: "",
     osat_score: 85,
-    createdAt: "2024-01-01T09:00:00Z"
+    createdAt: "2024-01-01T09:00:00Z",
   }
 
   const handleSaveAnnotation = (annotation: any) => {
@@ -36,12 +36,12 @@ export default function Annotation() {
       <SiteHeader
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: "Annotation" }
+          { label: "Annotation" },
         ]}
       />
 
-      <div className="flex-1 p-6 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-[25%_50%_25%] gap-6 h-full">
+      <div className="w-full flex-1 p-6">
+        <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-[25%_50%_25%]">
           {/* Video Details Column */}
           <div>
             <VideoDetails video={mockVideo} />

@@ -1,8 +1,14 @@
-import { type RouteConfig, index,route,layout   } from "@react-router/dev/routes"
+import {
+  type RouteConfig,
+  index,
+  route,
+  layout,
+} from "@react-router/dev/routes"
 
-export default [index("routes/home.tsx"),
-    route("login", "routes/login/page.tsx"),
-   layout("routes/layout.tsx", [
+export default [
+  index("routes/home.tsx"),
+  route("login", "routes/login/page.tsx"),
+  layout("routes/layout.tsx", [
     route("dashboard", "routes/dashboard.tsx"),
     route("videos", "routes/videos/index.tsx"),
     route("videos/create", "routes/videos/create.tsx"),

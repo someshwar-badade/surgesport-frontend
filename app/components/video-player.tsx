@@ -45,14 +45,18 @@ export default function VideoPlayer({ onCapture }: Props) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       // Prevent scrolling when space is pressed
-      e.preventDefault();
+      e.preventDefault()
       // Simulate click
       handleClick(
         // @ts-ignore: create a fake MouseEvent-like object for compatibility
-        { clientX: 0, clientY: 0, currentTarget: containerRef.current } as React.MouseEvent<HTMLDivElement>
-      );
+        {
+          clientX: 0,
+          clientY: 0,
+          currentTarget: containerRef.current,
+        } as React.MouseEvent<HTMLDivElement>
+      )
     }
-  };
+  }
 
   return (
     <button
@@ -60,7 +64,7 @@ export default function VideoPlayer({ onCapture }: Props) {
       onClick={handleClick as any}
       onKeyDown={handleKeyDown}
       aria-label="Video player area"
-      className="w-full aspect-video relative cursor-pointer border-none bg-none p-0 outline-none"
+      className="relative aspect-video w-full cursor-pointer border-none bg-none p-0 outline-none"
     >
       <ReactPlayer
         src="/videos/video-1.mp4"

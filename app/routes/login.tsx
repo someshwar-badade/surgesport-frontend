@@ -15,7 +15,6 @@ export default function Login() {
 
         <CardContent>
           <form className="space-y-4">
-            
             <div className="space-y-2">
               <Label>Email</Label>
               <Input type="email" placeholder="Enter your email" />
@@ -26,10 +25,7 @@ export default function Login() {
               <Input type="password" placeholder="Enter your password" />
             </div>
 
-            <Button className="w-full">
-              Login
-            </Button>
-
+            <Button className="w-full">Login</Button>
           </form>
         </CardContent>
       </Card>

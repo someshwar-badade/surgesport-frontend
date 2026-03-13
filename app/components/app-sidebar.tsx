@@ -13,7 +13,7 @@ import {
   IconHelp,
   IconInnerShadowTop,
   IconListDetails,
-  IconHighlight  ,
+  IconHighlight,
   IconReport,
   IconSearch,
   IconSettings,
@@ -59,7 +59,7 @@ const data = {
     {
       title: "Annotations",
       url: "/videos/annotation",
-      icon: IconHighlight ,
+      icon: IconHighlight,
     },
     {
       title: "Users",

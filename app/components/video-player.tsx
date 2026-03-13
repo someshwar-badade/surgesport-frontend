@@ -67,7 +67,7 @@ export default function VideoPlayer({ onCapture }: Props) {
       className="relative aspect-video w-full cursor-pointer border-none bg-none p-0 outline-none"
     >
       <ReactPlayer
-        src="/videos/video-1.mp4"
+        src="/videos/video-2.mp4"
         width="100%"
         height="100%"
         controls

@@ -10,6 +10,7 @@ import {
 import type { Route } from "./+types/root"
 import "./app.css"
 import { TooltipProvider } from "./components/ui/tooltip"
+import { AuthProvider } from "./context/authContext"
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -21,7 +22,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <TooltipProvider>{children}</TooltipProvider>
+        <TooltipProvider>
+           <AuthProvider>
+          {children}
+          </AuthProvider>
+        </TooltipProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

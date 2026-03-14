@@ -242,9 +242,7 @@ export function AnnotationDetails({
 
   return (
     <Card className="h-full">
-      <CardHeader>
-        <CardTitle>Annotation Details</CardTitle>
-      </CardHeader>
+      
       <CardContent>
         <Tabs defaultValue="phases" className="w-full">
           <div className="overflow-x-auto">

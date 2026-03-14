@@ -10,9 +10,7 @@ export function VideoDetails({ video }: VideoDetailsProps) {
   if (!video) {
     return (
       <Card className="h-full">
-        <CardHeader>
-          <CardTitle>Video Details</CardTitle>
-        </CardHeader>
+       
         <CardContent>
           <p className="text-muted-foreground">No video selected</p>
         </CardContent>

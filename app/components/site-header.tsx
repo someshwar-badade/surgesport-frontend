@@ -21,14 +21,13 @@ type SiteHeaderProps = {
 
 export function SiteHeader({ breadcrumbs }: SiteHeaderProps) {
   return (
-    <header className="h-14 flex items-center border-b px-4 gap-3">
+    <header className="flex h-14 items-center gap-3 border-b px-4">
       <SidebarTrigger />
 
       <Breadcrumb>
         <BreadcrumbList>
           {breadcrumbs.map((item, index) => (
             <span key={index} className="flex items-center gap-2">
-              
               <BreadcrumbItem>
                 {item.href ? (
                   <BreadcrumbLink asChild>

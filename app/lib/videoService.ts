@@ -12,64 +12,66 @@ export interface Video {
   createdAt: string
 }
 
-const STORAGE_KEY = "videos";
+const STORAGE_KEY = "videos"
 
 function readStorage(): Video[] {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
+  const raw = localStorage.getItem(STORAGE_KEY)
+  if (!raw) return []
   try {
-    return JSON.parse(raw) as Video[];
+    return JSON.parse(raw) as Video[]
   } catch {
-    return [];
+    return []
   }
 }
 
 function writeStorage(videos: Video[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(videos))
 }
 
 function delay<T>(result: T, ms = 300): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(result), ms));
+  return new Promise((resolve) => setTimeout(() => resolve(result), ms))
 }
 
 export async function getVideos(): Promise<Video[]> {
-  const videos = readStorage();
-  return delay(videos);
+  const videos = readStorage()
+  return delay(videos)
 }
 
 export async function getVideoById(id: string): Promise<Video | undefined> {
-  const videos = readStorage();
-  return delay(videos.find((v) => v.id === id));
+  const videos = readStorage()
+  return delay(videos.find((v) => v.id === id))
 }
 
-export async function createVideo(data: Omit<Video, "id" | "createdAt">): Promise<Video> {
-  const videos = readStorage();
+export async function createVideo(
+  data: Omit<Video, "id" | "createdAt">
+): Promise<Video> {
+  const videos = readStorage()
   const newVideo: Video = {
     ...data,
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
-  } as any;
-  videos.unshift(newVideo);
-  writeStorage(videos);
-  return delay(newVideo);
+  } as any
+  videos.unshift(newVideo)
+  writeStorage(videos)
+  return delay(newVideo)
 }
 
 export async function updateVideo(
   id: string,
   data: Partial<Omit<Video, "id" | "createdAt">>
 ): Promise<Video | undefined> {
-  const videos = readStorage();
-  const idx = videos.findIndex((v) => v.id === id);
-  if (idx === -1) return delay(undefined);
-  const updated = { ...videos[idx], ...data };
-  videos[idx] = updated;
-  writeStorage(videos);
-  return delay(updated);
+  const videos = readStorage()
+  const idx = videos.findIndex((v) => v.id === id)
+  if (idx === -1) return delay(undefined)
+  const updated = { ...videos[idx], ...data }
+  videos[idx] = updated
+  writeStorage(videos)
+  return delay(updated)
 }
 
 export async function deleteVideo(id: string): Promise<void> {
-  let videos = readStorage();
-  videos = videos.filter((v) => v.id !== id);
-  writeStorage(videos);
-  return delay(undefined as any);
+  let videos = readStorage()
+  videos = videos.filter((v) => v.id !== id)
+  writeStorage(videos)
+  return delay(undefined as any)
 }

@@ -62,6 +62,7 @@ export function AnnotationDetails({
   const [description, setDescription] = React.useState("")
   // Phase tracking state
   const [activePhases, setActivePhases] = React.useState<{[key: string]: {startTime: number, startAnnotation: Annotation}}>({})
+  const [activeInstruments, setActiveInstruments] = React.useState<{[key: string]: {startTime: number, startAnnotation: Annotation}}>({})
 
   const handleSaveAnnotation = (category: Annotation["category"]) => {
     if (!capture) return
@@ -78,49 +79,44 @@ export function AnnotationDetails({
     if (category === "phases") {
       // Check if this phase is already active
       if (activePhases[phaseName]) {
-        // End the phase
+        // End the phase by updating the existing start annotation
         const startData = activePhases[phaseName]
         const endTime = capture.time
         const duration = endTime - startData.startTime
 
-        annotation = {
-          ...baseAnnotation,
-          phaseName,
-          endTime,
-          duration,
-          note: `${phaseName} phase ended at ${endTime.toFixed(2)}s (duration: ${duration.toFixed(2)}s)`,
-        }
-
-        // Update the start annotation with end time and duration
-        setAnnotations(prev => prev.map(ann =>
-          ann.id === startData.startAnnotation.id
-            ? { ...ann, endTime, duration }
-            : ann
-        ))
+        setAnnotations((prev) =>
+          prev.map((ann) =>
+            ann.id === startData.startAnnotation.id
+              ? { ...ann, endTime, duration }
+              : ann
+          )
+        )
 
         // Remove from active phases
-        setActivePhases(prev => {
+        setActivePhases((prev) => {
           const newActive = { ...prev }
           delete newActive[phaseName]
           return newActive
         })
-      } else {
-        // Start a new phase
-        annotation = {
-          ...baseAnnotation,
-          phaseName,
-          note: `${phaseName} phase started at ${capture.time.toFixed(2)}s`,
-        }
 
-        // Add to active phases
-        setActivePhases(prev => ({
-          ...prev,
-          [phaseName]: {
-            startTime: capture.time,
-            startAnnotation: annotation
-          }
-        }))
+        return
       }
+
+      // Start a new phase
+      annotation = {
+        ...baseAnnotation,
+        phaseName,
+        note: `${phaseName} phase started at ${capture.time.toFixed(2)}s`,
+      }
+
+      // Add to active phases
+      setActivePhases((prev) => ({
+        ...prev,
+        [phaseName]: {
+          startTime: capture.time,
+          startAnnotation: annotation,
+        },
+      }))
     } else {
       // Handle other categories normally
       switch (category) {
@@ -139,12 +135,44 @@ export function AnnotationDetails({
           }
           break
         case "instrumentation":
+          // If this instrument is already active, end it and calculate duration
+          if (activeInstruments[instrumentName]) {
+            const startData = activeInstruments[instrumentName]
+            const endTime = capture.time
+            const duration = endTime - startData.startTime
+
+            setAnnotations((prev) =>
+              prev.map((ann) =>
+                ann.id === startData.startAnnotation.id
+                  ? { ...ann, endTime, duration }
+                  : ann
+              )
+            )
+
+            setActiveInstruments((prev) => {
+              const newActive = { ...prev }
+              delete newActive[instrumentName]
+              return newActive
+            })
+
+            return
+          }
+
+          // Start a new instrumentation entry
           annotation = {
             ...baseAnnotation,
             instrumentName,
             position,
             note: `${instrumentName} (${position}) started at ${capture.time.toFixed(2)}s`,
           }
+
+          setActiveInstruments((prev) => ({
+            ...prev,
+            [instrumentName]: {
+              startTime: capture.time,
+              startAnnotation: annotation,
+            },
+          }))
           break
         case "anomaly":
           annotation = {
@@ -196,6 +224,21 @@ export function AnnotationDetails({
     }
     return colors[category]
   }
+
+  const getSaveButtonLabel = (category: Annotation["category"]) => {
+    if (category === "phases") {
+      return activePhases[phaseName] ? "End Phase" : "Start Phase"
+    }
+
+    if (category === "instrumentation") {
+      return activeInstruments[instrumentName]
+        ? "End Instrument"
+        : "Start Instrument"
+    }
+
+    return `Save ${getCategoryLabel(category)} Annotation`
+  }
+
 
   return (
     <Card className="h-full">
@@ -349,40 +392,58 @@ export function AnnotationDetails({
                       )}
 
                       {category === "instrumentation" && (
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="instrumentName" className="text-sm font-medium">
-                              Instrument
-                            </Label>
-                            <select
-                              id="instrumentName"
-                              value={instrumentName}
-                              onChange={(e) => setInstrumentName(e.target.value)}
-                              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                            >
-                              <option value="">Select Instrument</option>
-                              <option value="camera">Camera</option>
-                              <option value="grasper">Grasper</option>
-                              <option value="dissector">Dissector</option>
-                              <option value="clip applier">Clip Applier</option>
-                              <option value="suction">Suction</option>
-                            </select>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor="instrumentName" className="text-sm font-medium">
+                                Instrument
+                              </Label>
+                              <select
+                                id="instrumentName"
+                                value={instrumentName}
+                                onChange={(e) => setInstrumentName(e.target.value)}
+                                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                              >
+                                <option value="">Select Instrument</option>
+                                <option value="camera">Camera</option>
+                                <option value="grasper">Grasper</option>
+                                <option value="dissector">Dissector</option>
+                                <option value="clip applier">Clip Applier</option>
+                                <option value="suction">Suction</option>
+                              </select>
+                            </div>
+                            <div>
+                              <Label htmlFor="position" className="text-sm font-medium">
+                                Position
+                              </Label>
+                              <select
+                                id="position"
+                                value={position}
+                                onChange={(e) => setPosition(e.target.value as "Left" | "Center" | "Right")}
+                                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                              >
+                                <option value="Left">Left</option>
+                                <option value="Center">Center</option>
+                                <option value="Right">Right</option>
+                              </select>
+                            </div>
                           </div>
-                          <div>
-                            <Label htmlFor="position" className="text-sm font-medium">
-                              Position
-                            </Label>
-                            <select
-                              id="position"
-                              value={position}
-                              onChange={(e) => setPosition(e.target.value as "Left" | "Center" | "Right")}
-                              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                            >
-                              <option value="Left">Left</option>
-                              <option value="Center">Center</option>
-                              <option value="Right">Right</option>
-                            </select>
-                          </div>
+
+                          {/* Show active instruments */}
+                          {Object.keys(activeInstruments).length > 0 && (
+                            <div className="p-3 bg-teal-50 dark:bg-teal-950/20 rounded-lg border border-teal-200 dark:border-teal-800">
+                              <h4 className="text-sm font-medium text-teal-800 dark:text-teal-200 mb-2">
+                                Active Instruments
+                              </h4>
+                              <div className="space-y-1 text-xs text-teal-700 dark:text-teal-300">
+                                {Object.entries(activeInstruments).map(([instrument, data]) => (
+                                  <div key={instrument}>
+                                    {instrument}: Started at {data.startTime.toFixed(2)}s
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -406,12 +467,12 @@ export function AnnotationDetails({
                       <Button
                         onClick={() => handleSaveAnnotation(category)}
                         size="sm"
-                        disabled={category === "phases" && !phaseName}
-                      >
-                        {category === "phases"
-                          ? (activePhases[phaseName] ? "End Phase" : "Start Phase")
-                          : `Save ${getCategoryLabel(category)} Annotation`
+                        disabled={
+                          (category === "phases" && !phaseName) ||
+                          (category === "instrumentation" && !instrumentName)
                         }
+                      >
+                        {getSaveButtonLabel(category)}
                       </Button>
                       <Button onClick={handleClear} variant="outline" size="sm">
                         Clear
@@ -458,6 +519,9 @@ export function AnnotationDetails({
                               <>
                                 <TableHead>Instrument</TableHead>
                                 <TableHead>Position</TableHead>
+                                <TableHead>Start</TableHead>
+                                <TableHead>End</TableHead>
+                                <TableHead>Duration</TableHead>
                               </>
                             )}
                             {category === "anomaly" && <TableHead>Description</TableHead>}
@@ -520,6 +584,15 @@ export function AnnotationDetails({
                                     </TableCell>
                                     <TableCell className="text-xs">
                                       {annotation.position}
+                                    </TableCell>
+                                    <TableCell className="font-mono text-xs">
+                                      {annotation.time.toFixed(2)}s
+                                    </TableCell>
+                                    <TableCell className="font-mono text-xs">
+                                      {annotation.endTime ? `${annotation.endTime.toFixed(2)}s` : '-'}
+                                    </TableCell>
+                                    <TableCell className="font-mono text-xs">
+                                      {annotation.duration ? `${annotation.duration.toFixed(2)}s` : '-'}
                                     </TableCell>
                                   </>
                                 )}

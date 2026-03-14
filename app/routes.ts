@@ -15,6 +15,7 @@ export default [
         route("videos/create", "routes/videos/create.tsx"),
         route("videos/$id", "routes/videos/$id.tsx"),
         route("videos/$id/edit", "routes/videos/$id.edit.tsx"),
+        route("videos/annotation", "routes/videos/annotation.tsx"),
     ]),
 
     ]),

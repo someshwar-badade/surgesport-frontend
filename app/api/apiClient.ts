@@ -1,5 +1,4 @@
-import axios, { AxiosError, type AxiosResponse } from "axios";
-import type {AxiosInstance, InternalAxiosRequestConfig} from "axios";
+import axios, { AxiosError, type AxiosResponse, type AxiosInstance, type InternalAxiosRequestConfig } from "axios";
 interface ApiErrorResponse {
     message?: string;
     errors?: Record<string, string[]>;

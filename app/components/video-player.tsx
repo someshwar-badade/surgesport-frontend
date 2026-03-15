@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react"
-import ReactPlayer from "react-player"
+import { default as ReactPlayer } from "react-player"
 import { Button } from "~/components/ui/button"
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react"
 
@@ -17,7 +17,8 @@ type Props = {
 
 export default function VideoPlayer({ onCapture }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const playerRef = useRef<ReactPlayer>(null)
+  // Use 'any' for playerRef to access instance methods like seekTo and getInternalPlayer
+  const playerRef = useRef<any>(null)
 
   const [playing, setPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -129,7 +130,7 @@ export default function VideoPlayer({ onCapture }: Props) {
       <div ref={containerRef} className="relative aspect-video w-full">
         <ReactPlayer
           ref={playerRef}
-          url="/videos/video-2.mp4"
+          src="/videos/video-2.mp4"
           width="100%"
           height="100%"
           controls={false}
@@ -158,6 +159,7 @@ export default function VideoPlayer({ onCapture }: Props) {
             value={currentTime}
             onChange={(e) => handleSeek(Number(e.target.value))}
             className="flex-1 cursor-pointer appearance-none rounded-lg bg-gray-200 h-2"
+            aria-label="Seek video"
           />
 
           <span className="font-mono text-sm">
@@ -193,10 +195,10 @@ export default function VideoPlayer({ onCapture }: Props) {
             }
             className="rounded border px-2 py-1 text-sm"
           >
-            <option value={0.5}>0.5x</option>
             <option value={1}>1x</option>
-            <option value={1.5}>1.5x</option>
             <option value={2}>2x</option>
+            <option value={5}>5x</option>
+            <option value={10}>10x</option>
           </select>
         </div>
       </div>

@@ -49,17 +49,23 @@ type Annotation = {
 }
 
 interface AnnotationDetailsProps {
-  readonly capture: CaptureData | null
+  readonly capture?: CaptureData | null
   readonly onSaveAnnotation?: (annotation: Annotation) => void
   readonly onClearCapture?: () => void
+  readonly annotations?: Annotation[]
+  readonly isViewMode?: boolean
 }
 
 export function AnnotationDetails({
   capture,
   onSaveAnnotation,
   onClearCapture,
+  annotations: propAnnotations,
+  isViewMode = false,
 }: AnnotationDetailsProps) {
-  const [annotations, setAnnotations] = React.useState<Annotation[]>([])
+  const [annotations, setAnnotations] = React.useState<Annotation[]>(
+    propAnnotations || []
+  )
   // Form state for additional fields
   const [phaseName, setPhaseName] = React.useState("")
   const [eventName, setEventName] = React.useState("")
@@ -293,273 +299,289 @@ export function AnnotationDetails({
             ] as const
           ).map((category) => (
             <TabsContent key={category} value={category} className="space-y-4">
-              {capture ? (
-                <div className="space-y-4">
-                  <div className="rounded-lg border bg-blue-50 p-4 dark:bg-blue-950/20">
-                    <h3 className="mb-3 font-semibold text-blue-900 dark:text-blue-100">
-                      Current Capture - {getCategoryLabel(category)}
-                    </h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="font-medium">Time:</span>{" "}
-                        {capture.time.toFixed(2)} sec
+              {!isViewMode && (
+                <>
+                  {capture ? (
+                    <div className="space-y-4">
+                      <div className="rounded-lg border bg-blue-50 p-4 dark:bg-blue-950/20">
+                        <h3 className="mb-3 font-semibold text-blue-900 dark:text-blue-100">
+                          Current Capture - {getCategoryLabel(category)}
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="font-medium">Time:</span>{" "}
+                            {capture.time.toFixed(2)} sec
+                          </div>
+                          <div>
+                            <span className="font-medium">X:</span>{" "}
+                            {capture.x.toFixed(1)}px
+                          </div>
+                          <div>
+                            <span className="font-medium">Y:</span>{" "}
+                            {capture.y.toFixed(1)}px
+                          </div>
+                          <div>
+                            <span className="font-medium">X%:</span>{" "}
+                            {capture.xPercent.toFixed(2)}%
+                          </div>
+                          <div>
+                            <span className="font-medium">Y%:</span>{" "}
+                            {capture.yPercent.toFixed(2)}%
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <span className="font-medium">X:</span>{" "}
-                        {capture.x.toFixed(1)}px
+
+                      {/* Category-specific form fields */}
+                      <div className="space-y-3">
+                        {category === "phases" && (
+                          <div className="space-y-3">
+                            <div>
+                              <Label
+                                htmlFor="phaseName"
+                                className="text-sm font-medium"
+                              >
+                                Phase Name
+                              </Label>
+                              <select
+                                id="phaseName"
+                                value={phaseName}
+                                onChange={(e) => setPhaseName(e.target.value)}
+                                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                              >
+                                <option value="">Select Phase</option>
+                                <option value="Retraction">Retraction</option>
+                                <option value="Lysis of Adhesions">
+                                  Lysis of Adhesions
+                                </option>
+                                <option value="Dissection of Cystic Triangle">
+                                  Dissection of Cystic Triangle
+                                </option>
+                                <option value="Clipping Phase">
+                                  Clipping Phase
+                                </option>
+                                <option value="Individual Clip Applications">
+                                  Individual Clip Applications
+                                </option>
+                                <option value="Dissection of Gallbladder from Liver Bed">
+                                  Dissection of Gallbladder from Liver Bed
+                                </option>
+                              </select>
+                            </div>
+
+                            {/* Show active phases */}
+                            {Object.keys(activePhases).length > 0 && (
+                              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-950/20">
+                                <h4 className="mb-2 text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                                  Active Phases
+                                </h4>
+                                <div className="space-y-1">
+                                  {Object.entries(activePhases).map(
+                                    ([phase, data]) => (
+                                      <div
+                                        key={phase}
+                                        className="text-xs text-yellow-700 dark:text-yellow-300"
+                                      >
+                                        {phase}: Started at{" "}
+                                        {data.startTime.toFixed(2)}s
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {category === "events" && (
+                          <div>
+                            <Label
+                              htmlFor="eventName"
+                              className="text-sm font-medium"
+                            >
+                              Event Name
+                            </Label>
+                            <select
+                              id="eventName"
+                              value={eventName}
+                              onChange={(e) => setEventName(e.target.value)}
+                              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            >
+                              <option value="">Select Event</option>
+                              <option value="CCVS I">CCVS I</option>
+                              <option value="CCVS II">CCVS II</option>
+                              <option value="CCVS III">CCVS III</option>
+                              <option value="Cystic Artery Cut">
+                                Cystic Artery Cut
+                              </option>
+                              <option value="Cystic Duct Cut">
+                                Cystic Duct Cut
+                              </option>
+                              <option value="Clip Applied">Clip Applied</option>
+                            </select>
+                          </div>
+                        )}
+
+                        {category === "bleeds" && (
+                          <div className="space-y-3">
+                            <div>
+                              <Label
+                                htmlFor="severity"
+                                className="text-sm font-medium"
+                              >
+                                Severity
+                              </Label>
+                              <select
+                                id="severity"
+                                value={severity}
+                                onChange={(e) =>
+                                  setSeverity(
+                                    e.target.value as
+                                      | "mild"
+                                      | "moderate"
+                                      | "severe"
+                                  )
+                                }
+                                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                              >
+                                <option value="mild">Mild</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="severe">Severe</option>
+                              </select>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              <p>
+                                Location: ({capture.xPercent.toFixed(1)}%,{" "}
+                                {capture.yPercent.toFixed(1)}%)
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {category === "instrumentation" && (
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label
+                                  htmlFor="instrumentName"
+                                  className="text-sm font-medium"
+                                >
+                                  Instrument
+                                </Label>
+                                <select
+                                  id="instrumentName"
+                                  value={instrumentName}
+                                  onChange={(e) =>
+                                    setInstrumentName(e.target.value)
+                                  }
+                                  className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                >
+                                  <option value="">Select Instrument</option>
+                                  <option value="camera">Camera</option>
+                                  <option value="grasper">Grasper</option>
+                                  <option value="dissector">Dissector</option>
+                                  <option value="clip applier">
+                                    Clip Applier
+                                  </option>
+                                  <option value="suction">Suction</option>
+                                </select>
+                              </div>
+                              <div>
+                                <Label
+                                  htmlFor="position"
+                                  className="text-sm font-medium"
+                                >
+                                  Position
+                                </Label>
+                                <select
+                                  id="position"
+                                  value={position}
+                                  onChange={(e) =>
+                                    setPosition(
+                                      e.target.value as
+                                        | "Left"
+                                        | "Center"
+                                        | "Right"
+                                    )
+                                  }
+                                  className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                >
+                                  <option value="Left">Left</option>
+                                  <option value="Center">Center</option>
+                                  <option value="Right">Right</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            {/* Show active instruments */}
+                            {Object.keys(activeInstruments).length > 0 && (
+                              <div className="rounded-lg border border-teal-200 bg-teal-50 p-3 dark:border-teal-800 dark:bg-teal-950/20">
+                                <h4 className="mb-2 text-sm font-medium text-teal-800 dark:text-teal-200">
+                                  Active Instruments
+                                </h4>
+                                <div className="space-y-1 text-xs text-teal-700 dark:text-teal-300">
+                                  {Object.entries(activeInstruments).map(
+                                    ([instrument, data]) => (
+                                      <div key={instrument}>
+                                        {instrument}: Started at{" "}
+                                        {data.startTime.toFixed(2)}s
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {category === "anomaly" && (
+                          <div>
+                            <Label
+                              htmlFor="description"
+                              className="text-sm font-medium"
+                            >
+                              Description
+                            </Label>
+                            <Input
+                              id="description"
+                              value={description}
+                              onChange={(e) => setDescription(e.target.value)}
+                              placeholder="Describe the anomaly..."
+                              className="mt-1"
+                            />
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <span className="font-medium">Y:</span>{" "}
-                        {capture.y.toFixed(1)}px
-                      </div>
-                      <div>
-                        <span className="font-medium">X%:</span>{" "}
-                        {capture.xPercent.toFixed(2)}%
-                      </div>
-                      <div>
-                        <span className="font-medium">Y%:</span>{" "}
-                        {capture.yPercent.toFixed(2)}%
+
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleSaveAnnotation(category)}
+                          size="sm"
+                          disabled={
+                            (category === "phases" && !phaseName) ||
+                            (category === "instrumentation" && !instrumentName)
+                          }
+                        >
+                          {getSaveButtonLabel(category)}
+                        </Button>
+                        <Button
+                          onClick={handleClear}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Clear
+                        </Button>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Category-specific form fields */}
-                  <div className="space-y-3">
-                    {category === "phases" && (
-                      <div className="space-y-3">
-                        <div>
-                          <Label
-                            htmlFor="phaseName"
-                            className="text-sm font-medium"
-                          >
-                            Phase Name
-                          </Label>
-                          <select
-                            id="phaseName"
-                            value={phaseName}
-                            onChange={(e) => setPhaseName(e.target.value)}
-                            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                          >
-                            <option value="">Select Phase</option>
-                            <option value="Retraction">Retraction</option>
-                            <option value="Lysis of Adhesions">
-                              Lysis of Adhesions
-                            </option>
-                            <option value="Dissection of Cystic Triangle">
-                              Dissection of Cystic Triangle
-                            </option>
-                            <option value="Clipping Phase">
-                              Clipping Phase
-                            </option>
-                            <option value="Individual Clip Applications">
-                              Individual Clip Applications
-                            </option>
-                            <option value="Dissection of Gallbladder from Liver Bed">
-                              Dissection of Gallbladder from Liver Bed
-                            </option>
-                          </select>
-                        </div>
-
-                        {/* Show active phases */}
-                        {Object.keys(activePhases).length > 0 && (
-                          <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-950/20">
-                            <h4 className="mb-2 text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                              Active Phases
-                            </h4>
-                            <div className="space-y-1">
-                              {Object.entries(activePhases).map(
-                                ([phase, data]) => (
-                                  <div
-                                    key={phase}
-                                    className="text-xs text-yellow-700 dark:text-yellow-300"
-                                  >
-                                    {phase}: Started at{" "}
-                                    {data.startTime.toFixed(2)}s
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {category === "events" && (
-                      <div>
-                        <Label
-                          htmlFor="eventName"
-                          className="text-sm font-medium"
-                        >
-                          Event Name
-                        </Label>
-                        <select
-                          id="eventName"
-                          value={eventName}
-                          onChange={(e) => setEventName(e.target.value)}
-                          className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        >
-                          <option value="">Select Event</option>
-                          <option value="CCVS I">CCVS I</option>
-                          <option value="CCVS II">CCVS II</option>
-                          <option value="CCVS III">CCVS III</option>
-                          <option value="Cystic Artery Cut">
-                            Cystic Artery Cut
-                          </option>
-                          <option value="Cystic Duct Cut">
-                            Cystic Duct Cut
-                          </option>
-                          <option value="Clip Applied">Clip Applied</option>
-                        </select>
-                      </div>
-                    )}
-
-                    {category === "bleeds" && (
-                      <div className="space-y-3">
-                        <div>
-                          <Label
-                            htmlFor="severity"
-                            className="text-sm font-medium"
-                          >
-                            Severity
-                          </Label>
-                          <select
-                            id="severity"
-                            value={severity}
-                            onChange={(e) =>
-                              setSeverity(
-                                e.target.value as "mild" | "moderate" | "severe"
-                              )
-                            }
-                            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                          >
-                            <option value="mild">Mild</option>
-                            <option value="moderate">Moderate</option>
-                            <option value="severe">Severe</option>
-                          </select>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          <p>
-                            Location: ({capture.xPercent.toFixed(1)}%,{" "}
-                            {capture.yPercent.toFixed(1)}%)
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {category === "instrumentation" && (
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label
-                              htmlFor="instrumentName"
-                              className="text-sm font-medium"
-                            >
-                              Instrument
-                            </Label>
-                            <select
-                              id="instrumentName"
-                              value={instrumentName}
-                              onChange={(e) =>
-                                setInstrumentName(e.target.value)
-                              }
-                              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                            >
-                              <option value="">Select Instrument</option>
-                              <option value="camera">Camera</option>
-                              <option value="grasper">Grasper</option>
-                              <option value="dissector">Dissector</option>
-                              <option value="clip applier">Clip Applier</option>
-                              <option value="suction">Suction</option>
-                            </select>
-                          </div>
-                          <div>
-                            <Label
-                              htmlFor="position"
-                              className="text-sm font-medium"
-                            >
-                              Position
-                            </Label>
-                            <select
-                              id="position"
-                              value={position}
-                              onChange={(e) =>
-                                setPosition(
-                                  e.target.value as "Left" | "Center" | "Right"
-                                )
-                              }
-                              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                            >
-                              <option value="Left">Left</option>
-                              <option value="Center">Center</option>
-                              <option value="Right">Right</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* Show active instruments */}
-                        {Object.keys(activeInstruments).length > 0 && (
-                          <div className="rounded-lg border border-teal-200 bg-teal-50 p-3 dark:border-teal-800 dark:bg-teal-950/20">
-                            <h4 className="mb-2 text-sm font-medium text-teal-800 dark:text-teal-200">
-                              Active Instruments
-                            </h4>
-                            <div className="space-y-1 text-xs text-teal-700 dark:text-teal-300">
-                              {Object.entries(activeInstruments).map(
-                                ([instrument, data]) => (
-                                  <div key={instrument}>
-                                    {instrument}: Started at{" "}
-                                    {data.startTime.toFixed(2)}s
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {category === "anomaly" && (
-                      <div>
-                        <Label
-                          htmlFor="description"
-                          className="text-sm font-medium"
-                        >
-                          Description
-                        </Label>
-                        <Input
-                          id="description"
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          placeholder="Describe the anomaly..."
-                          className="mt-1"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => handleSaveAnnotation(category)}
-                      size="sm"
-                      disabled={
-                        (category === "phases" && !phaseName) ||
-                        (category === "instrumentation" && !instrumentName)
-                      }
-                    >
-                      {getSaveButtonLabel(category)}
-                    </Button>
-                    <Button onClick={handleClear} variant="outline" size="sm">
-                      Clear
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="py-8 text-center text-muted-foreground">
-                  <p>Click on the video to capture coordinates</p>
-                  <p className="mt-1 text-xs">
-                    Then save as a {getCategoryLabel(category).toLowerCase()}{" "}
-                    annotation
-                  </p>
-                </div>
+                  ) : (
+                    <div className="py-8 text-center text-muted-foreground">
+                      <p>Click on the video to capture coordinates</p>
+                      <p className="mt-1 text-xs">
+                        Then save as a{" "}
+                        {getCategoryLabel(category).toLowerCase()} annotation
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
 
               {getAnnotationsByCategory(category).length > 0 && (

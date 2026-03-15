@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import ReactPlayer from "react-player"
 import { Button } from "~/components/ui/button"
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react"
@@ -85,6 +85,14 @@ export default function VideoPlayer({ onCapture }: Props) {
     })
   }
 
+  useEffect(() => {
+  return () => {
+    const video = videoRef.current
+    if (!video) return
+    video.removeEventListener("timeupdate", () => {})
+  }
+}, [])
+
   return (
     <div className="w-full">
       <div
@@ -100,16 +108,19 @@ export default function VideoPlayer({ onCapture }: Props) {
           controls={false}
           playing={playing}
           playbackRate={playbackRate}
-          onProgress={(state) => {
-            if (Number.isFinite(state.playedSeconds)) {
-              setCurrentTime(state.playedSeconds)
-            }
-          }}
+          
+          
           onLoadedMetadata={(e: any) => {
             const video = e.target as HTMLVideoElement
 
             videoRef.current = video
             setDuration(video.duration)
+
+            const updateTime = () => {
+                setCurrentTime(video.currentTime)
+              }
+
+              video.addEventListener("timeupdate", updateTime)
           }}
         />
       </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react"
-import { default as ReactPlayer } from "react-player"
+import ReactPlayer from "react-player"
 import { Button } from "~/components/ui/button"
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react"
 
@@ -25,13 +25,8 @@ export default function VideoPlayer({ onCapture }: Props) {
   const [duration, setDuration] = useState(0)
   const [playbackRate, setPlaybackRate] = useState(1)
 
-  const getVideoElement = (): HTMLVideoElement | null => {
-    const internal = playerRef.current?.getInternalPlayer?.()
-
-    if (internal instanceof HTMLVideoElement) return internal
-
-    return containerRef.current?.querySelector("video") || null
-  }
+  // Returns the internal player for advanced use (YouTube, file, etc.)
+  const getInternalPlayer = () => playerRef.current?.getInternalPlayer?.();
 
   const handlePlayPause = () => {
     setPlaying((prev) => !prev)
@@ -43,22 +38,38 @@ export default function VideoPlayer({ onCapture }: Props) {
   }
 
   const seekTo = (time: number) => {
-    const safe = clampTime(time)
-
-    playerRef.current?.seekTo(safe, "seconds")
-
-    const video = getVideoElement()
-    if (video) video.currentTime = safe
-
-    setCurrentTime(safe)
+    const safe = clampTime(time);
+    console.log(`Seeking to ${safe} seconds`)
+    // Use ReactPlayer's seekTo for all sources
+    if (playerRef.current && typeof playerRef.current.seekTo === "function") {
+      playerRef.current.seekTo(safe, "seconds");
+    } else {
+      // fallback for native video (shouldn't be needed)
+      const internal = getInternalPlayer();
+      if (internal && typeof internal.currentTime === "number") {
+        internal.currentTime = safe;
+      }
+    }
+    setCurrentTime(safe);
   }
 
   const handleRewind = () => {
-    seekTo(currentTime - 10)
+    // Get the actual current time from the player if possible
+    let actualTime = currentTime;
+    if (playerRef.current && typeof playerRef.current.getCurrentTime === "function") {
+      actualTime = playerRef.current.getCurrentTime();
+    }
+    console.log("Rewind 10 seconds", { actualTime });
+    seekTo(actualTime - 10);
   }
 
   const handleForward = () => {
-    seekTo(currentTime + 10)
+    let actualTime = currentTime;
+    if (playerRef.current && typeof playerRef.current.getCurrentTime === "function") {
+      actualTime = playerRef.current.getCurrentTime();
+    }
+    console.log("forward 10 seconds", { actualTime });
+    seekTo(actualTime + 10);
   }
 
   const handleProgress = (state: { playedSeconds: number }) => {
@@ -67,6 +78,7 @@ export default function VideoPlayer({ onCapture }: Props) {
   }
 
   const handleSeek = (value: number) => {
+    console.log("Seeking to", value)
     seekTo(value)
   }
 
@@ -83,46 +95,9 @@ export default function VideoPlayer({ onCapture }: Props) {
     const container = containerRef.current
     if (!container) return
 
-    const attachListener = () => {
-      const video = getVideoElement()
-      if (!video) return
+    // Removed attachListener and getVideoElement logic. If you need to capture clicks, use ReactPlayer's onClick or overlay a div.
 
-      const onClick = (e: MouseEvent) => {
-        const rect = video.getBoundingClientRect()
-
-        const y = e.clientY - rect.top
-        const controlAreaThreshold = 40
-
-        if (y > rect.height - controlAreaThreshold) return
-
-        const x = e.clientX - rect.left
-
-        const xPercent = (x / rect.width) * 100
-        const yPercent = (y / rect.height) * 100
-
-        onCapture?.({
-          time: video.currentTime,
-          x,
-          y,
-          xPercent,
-          yPercent,
-        })
-      }
-
-      video.addEventListener("click", onClick)
-
-      return () => video.removeEventListener("click", onClick)
-    }
-
-    const timer = setInterval(() => {
-      const video = getVideoElement()
-      if (video) {
-        attachListener()
-        clearInterval(timer)
-      }
-    }, 300)
-
-    return () => clearInterval(timer)
+    // No need for polling or attaching listeners to the internal video element
   }, [onCapture])
 
   return (
@@ -130,15 +105,22 @@ export default function VideoPlayer({ onCapture }: Props) {
       <div ref={containerRef} className="relative aspect-video w-full">
         <ReactPlayer
           ref={playerRef}
-          src="/videos/video-2.mp4"
+          src="https://www.youtube.com/watch?v=CT_WEGUKejQ"
           width="100%"
           height="100%"
           controls={false}
           playing={playing}
           playbackRate={playbackRate}
           onProgress={handleProgress as any}
-          onDuration={(d: number) => {
-            if (Number.isFinite(d)) setDuration(d)
+          onDurationChange={(e: Event) => {
+            const video = e.target as HTMLVideoElement
+            const duration = video.duration
+
+            console.log("Video duration:", duration)
+
+            if (Number.isFinite(duration)) {
+              setDuration(duration)
+            }
           }}
         />
       </div>

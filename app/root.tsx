@@ -23,9 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <TooltipProvider>
-           <AuthProvider>
-          {children}
-          </AuthProvider>
+          <AuthProvider>{children}</AuthProvider>
         </TooltipProvider>
         <ScrollRestoration />
         <Scripts />

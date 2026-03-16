@@ -23,32 +23,31 @@ export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-
-  const { error, userRegister, loading } = useAuthActions();
-  const navigate = useNavigate();
+  const { error, userRegister, loading } = useAuthActions()
+  const navigate = useNavigate()
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     password_confirmation: "",
-    role_id: "1"
-  });
+    role_id: "1",
+  })
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    const res = await userRegister(form);
+    const res = await userRegister(form)
 
     if (res) {
-      navigate("/login");
+      navigate("/login")
     }
-  };
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
-        <CardContent className=" p-0">
+        <CardContent className="p-0">
           <form onSubmit={handleSubmit} className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
@@ -57,7 +56,7 @@ export function RegisterForm({
                   Sign up to get started
                 </p>
               </div>
-              
+
               <Field>
                 <FieldLabel htmlFor="name">Name</FieldLabel>
                 <Input
@@ -69,7 +68,7 @@ export function RegisterForm({
                   required
                 />
               </Field>
-              
+
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
@@ -81,7 +80,7 @@ export function RegisterForm({
                   required
                 />
               </Field>
-              
+
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
                 <Input
@@ -90,52 +89,56 @@ export function RegisterForm({
                   placeholder="********"
                   value={form.password}
                   onChange={(e) => {
-                    setForm({ ...form, password: e.target.value });
+                    setForm({ ...form, password: e.target.value })
                   }}
                   required
                 />
               </Field>
-              
+
               <Field>
-                <FieldLabel htmlFor="password_confirmation">Confirm Password</FieldLabel>
+                <FieldLabel htmlFor="password_confirmation">
+                  Confirm Password
+                </FieldLabel>
                 <Input
                   id="password_confirmation"
                   type="password"
                   placeholder="********"
                   value={form.password_confirmation}
                   onChange={(e) => {
-                    setForm({ ...form, password_confirmation: e.target.value });
+                    setForm({ ...form, password_confirmation: e.target.value })
                   }}
                   required
                 />
               </Field>
-              
+
               <Field>
                 <FieldLabel htmlFor="role">Role</FieldLabel>
-                <Select 
-                    value={form.role_id} 
-                    onValueChange={(value) => setForm({ ...form, role_id: value })}
+                <Select
+                  value={form.role_id}
+                  onValueChange={(value) =>
+                    setForm({ ...form, role_id: value })
+                  }
                 >
-                    <SelectTrigger>
+                  <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
+                  </SelectTrigger>
+                  <SelectContent>
                     <SelectItem value="1">User</SelectItem>
                     <SelectItem value="2">Admin</SelectItem>
-                    </SelectContent>
+                  </SelectContent>
                 </Select>
-                </Field>
-              
+              </Field>
+
               <Field>
                 <Button type="submit" disabled={loading}>
                   {loading ? "Creating account..." : "Sign Up"}
                 </Button>
               </Field>
-              
+
               {error && (
-                <p className="text-sm text-red-500 text-center">{error}</p>
+                <p className="text-center text-sm text-red-500">{error}</p>
               )}
-              
+
               <FieldDescription className="text-center">
                 Already have an account? <a href="/login">Sign in</a>
               </FieldDescription>

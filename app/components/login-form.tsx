@@ -17,26 +17,23 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const { error, userLogin, loading } = useAuthActions()
+  const navigate = useNavigate()
 
-  const {error, userLogin, loading } = useAuthActions();
-    const navigate = useNavigate();
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  })
 
-    const [form, setForm] = useState({
-        email: "",
-        password: ""
-    });
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement> ) => {
+    const res = await userLogin(form)
 
-        e.preventDefault();
-
-        const res = await userLogin(form);
-
-        if (res) {
-            navigate("/dashboard");
-        }
-    };
-
+    if (res) {
+      navigate("/dashboard")
+    }
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -56,7 +53,7 @@ export function LoginForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  onChange={(e)=>setForm({...form,email:e.target.value})}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
                 />
               </Field>
@@ -70,7 +67,14 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" onChange={(e)=>setForm({...form,password:e.target.value})} required />
+                <Input
+                  id="password"
+                  type="password"
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                  required
+                />
               </Field>
               <Field>
                 <Button type="submit">Login</Button>

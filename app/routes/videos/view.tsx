@@ -5,147 +5,10 @@ import { AnnotationDetails } from "~/components/videos/AnnotationDetails"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Card, CardContent } from "~/components/ui/card"
 import { AnnotationTimeline } from "~/components/videos/AnnotationTimeline"
-import { useState } from "react"
-
-// Sample annotation data for a 10-minute video, filling all time with annotation
-const sampleAnnotations = [
-  // 0-60s: Phase
-  {
-    id: "1",
-    timestamp: "2024-01-01T10:00:00Z",
-    time: 0,
-    x: 100,
-    y: 200,
-    xPercent: 10,
-    yPercent: 20,
-    category: "phases" as const,
-    phaseName: "Preparation",
-    endTime: 60,
-    duration: 60,
-  },
-  // 60-120s: Phase
-  {
-    id: "2",
-    timestamp: "2024-01-01T10:01:00Z",
-    time: 60,
-    x: 120,
-    y: 220,
-    xPercent: 20,
-    yPercent: 30,
-    category: "phases" as const,
-    phaseName: "Incision",
-    endTime: 120,
-    duration: 60,
-  },
-  // 120-180s: Event
-  {
-    id: "3",
-    timestamp: "2024-01-01T10:02:00Z",
-    time: 120,
-    x: 140,
-    y: 240,
-    xPercent: 30,
-    yPercent: 40,
-    category: "events" as const,
-    eventName: "Bleeding Started",
-  },
-  // 180-240s: Bleed
-  {
-    id: "4",
-    timestamp: "2024-01-01T10:03:00Z",
-    time: 180,
-    x: 160,
-    y: 260,
-    xPercent: 40,
-    yPercent: 50,
-    category: "bleeds" as const,
-    interventionTime: 200,
-    severity: "moderate" as const,
-  },
-  // 240-300s: Instrumentation
-  {
-    id: "5",
-    timestamp: "2024-01-01T10:04:00Z",
-    time: 240,
-    x: 180,
-    y: 280,
-    xPercent: 50,
-    yPercent: 60,
-    category: "instrumentation" as const,
-    instrumentName: "Scalpel",
-    position: "Center" as const,
-    endTime: 300,
-    duration: 60,
-  },
-  // 300-360s: Anomaly
-  {
-    id: "6",
-    timestamp: "2024-01-01T10:05:00Z",
-    time: 300,
-    x: 200,
-    y: 300,
-    xPercent: 60,
-    yPercent: 70,
-    category: "anomaly" as const,
-    description: "Unexpected tissue response",
-    note: "Monitor closely",
-  },
-  // 360-420s: Phase
-  {
-    id: "7",
-    timestamp: "2024-01-01T10:06:00Z",
-    time: 360,
-    x: 220,
-    y: 320,
-    xPercent: 70,
-    yPercent: 80,
-    category: "phases" as const,
-    phaseName: "Dissection",
-    endTime: 420,
-    duration: 60,
-  },
-  // 420-480s: Event
-  {
-    id: "8",
-    timestamp: "2024-01-01T10:07:00Z",
-    time: 420,
-    x: 240,
-    y: 340,
-    xPercent: 80,
-    yPercent: 90,
-    category: "events" as const,
-    eventName: "Suturing Started",
-  },
-  // 480-540s: Instrumentation
-  {
-    id: "9",
-    timestamp: "2024-01-01T10:08:00Z",
-    time: 480,
-    x: 260,
-    y: 360,
-    xPercent: 90,
-    yPercent: 95,
-    category: "instrumentation" as const,
-    instrumentName: "Needle Holder",
-    position: "Left" as const,
-    endTime: 540,
-    duration: 60,
-  },
-  // 540-600s: Phase
-  {
-    id: "10",
-    timestamp: "2024-01-01T10:09:00Z",
-    time: 540,
-    x: 280,
-    y: 380,
-    xPercent: 95,
-    yPercent: 99,
-    category: "phases" as const,
-    phaseName: "Closure",
-    endTime: 600,
-    duration: 60,
-  },
-]
+import { useState, useEffect } from "react"
+import { getAnnotationsByVideoId } from "~/lib/annotationService"
+import { initializeSampleAnnotations } from "~/lib/sampleData"
+import type { Annotation } from "~/types/annotation.type"
 
 // Mock video data for 10 min duration
 const mockVideo = {
@@ -165,6 +28,33 @@ const mockVideo = {
 export default function ViewAnnotation() {
   const [videoDuration, setVideoDuration] = useState(600) // Default to 10 minutes
   const [seekTime, setSeekTime] = useState<number | undefined>(undefined)
+  const [annotations, setAnnotations] = useState<Annotation[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Mock video ID - in a real app this would come from route params
+  const videoId = "1"
+
+  useEffect(() => {
+    const loadAnnotations = async () => {
+      try {
+        let data = await getAnnotationsByVideoId(videoId)
+
+        // Initialize sample data if no annotations exist
+        if (data.length === 0) {
+          await initializeSampleAnnotations()
+          data = await getAnnotationsByVideoId(videoId)
+        }
+
+        setAnnotations(data)
+      } catch (error) {
+        console.error("Failed to load annotations:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadAnnotations()
+  }, [videoId])
 
   const handleDurationChange = (duration: number) => {
     setVideoDuration(duration)
@@ -193,7 +83,7 @@ export default function ViewAnnotation() {
             </div>
             {/* Timeline below video */}
             <AnnotationTimeline
-              annotations={sampleAnnotations}
+              annotations={annotations}
               videoDuration={videoDuration}
               onAnnotationClick={handleAnnotationClick}
             />
@@ -216,8 +106,9 @@ export default function ViewAnnotation() {
                 </TabsContent>
                 <TabsContent key="annotations" value="annotations">
                   <AnnotationDetails
-                    annotations={sampleAnnotations}
+                    annotations={annotations}
                     isViewMode={true}
+                    videoId={videoId}
                   />
                 </TabsContent>
               </Tabs>

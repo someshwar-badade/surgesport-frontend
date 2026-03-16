@@ -13,6 +13,8 @@ import {
 } from "~/components/ui/table"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
+import type { Annotation } from "~/types/annotation.type"
+import { formatSeconds } from "~/lib/utils"
 
 type CaptureData = {
   time: number
@@ -22,38 +24,13 @@ type CaptureData = {
   yPercent: number
 }
 
-type Annotation = {
-  id: string
-  timestamp: string
-  time: number
-  x: number
-  y: number
-  xPercent: number
-  yPercent: number
-  category: "phases" | "events" | "bleeds" | "instrumentation" | "anomaly"
-  // Phase specific fields
-  phaseName?: string
-  endTime?: number
-  duration?: number
-  // Event specific fields
-  eventName?: string
-  // Bleed specific fields
-  interventionTime?: number
-  severity?: "mild" | "moderate" | "severe"
-  // Instrumentation specific fields
-  instrumentName?: string
-  position?: "Left" | "Center" | "Right"
-  // Anomaly specific fields
-  description?: string
-  note?: string
-}
-
 interface AnnotationDetailsProps {
   readonly capture?: CaptureData | null
   readonly onSaveAnnotation?: (annotation: Annotation) => void
   readonly onClearCapture?: () => void
   readonly annotations?: Annotation[]
   readonly isViewMode?: boolean
+  readonly videoId?: string
 }
 
 export function AnnotationDetails({
@@ -62,6 +39,7 @@ export function AnnotationDetails({
   onClearCapture,
   annotations: propAnnotations,
   isViewMode = false,
+  videoId = "1",
 }: AnnotationDetailsProps) {
   const [annotations, setAnnotations] = React.useState<Annotation[]>(
     propAnnotations || []
@@ -90,7 +68,10 @@ export function AnnotationDetails({
 
     const baseAnnotation = {
       id: crypto.randomUUID(),
+      video_id: videoId,
       timestamp: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       ...capture,
       category,
     }
@@ -127,7 +108,7 @@ export function AnnotationDetails({
       annotation = {
         ...baseAnnotation,
         phaseName,
-        note: `${phaseName} phase started at ${capture.time.toFixed(2)}s`,
+          note: `${phaseName} phase started at ${formatSeconds(capture.time)}`,
       }
 
       // Add to active phases
@@ -145,14 +126,14 @@ export function AnnotationDetails({
           annotation = {
             ...baseAnnotation,
             eventName,
-            note: `${eventName} event at ${capture.time.toFixed(2)}s`,
+            note: `${eventName} event at ${formatSeconds(capture.time)}`,
           }
           break
         case "bleeds":
           annotation = {
             ...baseAnnotation,
             severity,
-            note: `${severity} bleed at ${capture.time.toFixed(2)}s`,
+            note: `${severity} bleed at ${formatSeconds(capture.time)}`,
           }
           break
         case "instrumentation":
@@ -184,7 +165,7 @@ export function AnnotationDetails({
             ...baseAnnotation,
             instrumentName,
             position,
-            note: `${instrumentName} (${position}) started at ${capture.time.toFixed(2)}s`,
+            note: `${instrumentName} (${position}) started at ${formatSeconds(capture.time)}`,
           }
 
           setActiveInstruments((prev) => ({
@@ -199,13 +180,13 @@ export function AnnotationDetails({
           annotation = {
             ...baseAnnotation,
             description,
-            note: `Anomaly: ${description} at ${capture.time.toFixed(2)}s`,
+            note: `Anomaly: ${description} at ${formatSeconds(capture.time)}`,
           }
           break
         default:
           annotation = {
             ...baseAnnotation,
-            note: `Annotation at ${capture.time.toFixed(2)}s`,
+            note: `Annotation at ${formatSeconds(capture.time)}`,
           }
       }
     }
@@ -267,24 +248,24 @@ export function AnnotationDetails({
         <Tabs defaultValue="phases" className="w-full">
           <div className="overflow-x-auto">
             <TabsList className="inline-flex h-10 w-max min-w-full items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
-              <TabsTrigger value="phases" className="whitespace-nowrap">
-                Phases ({getAnnotationsByCategory("phases").length})
+              <TabsTrigger value="phases" className="whitespace-nowrap ">
+                <span className="text-blue-500">Phases ({getAnnotationsByCategory("phases").length})</span>
               </TabsTrigger>
               <TabsTrigger value="events" className="whitespace-nowrap">
-                Events ({getAnnotationsByCategory("events").length})
+                <span className="text-green-500">Events ({getAnnotationsByCategory("events").length})</span>
               </TabsTrigger>
               <TabsTrigger value="bleeds" className="whitespace-nowrap">
-                Bleeds ({getAnnotationsByCategory("bleeds").length})
+                <span className="text-red-500">Bleeds ({getAnnotationsByCategory("bleeds").length})</span>
               </TabsTrigger>
               <TabsTrigger
                 value="instrumentation"
                 className="whitespace-nowrap"
               >
-                Instrumentation (
-                {getAnnotationsByCategory("instrumentation").length})
+                <span className="text-purple-500">Instrumentation (
+                {getAnnotationsByCategory("instrumentation").length})</span>
               </TabsTrigger>
               <TabsTrigger value="anomaly" className="whitespace-nowrap">
-                Anomaly ({getAnnotationsByCategory("anomaly").length})
+                <span className="text-orange-500">Anomaly ({getAnnotationsByCategory("anomaly").length})</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -310,7 +291,7 @@ export function AnnotationDetails({
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
                             <span className="font-medium">Time:</span>{" "}
-                            {capture.time.toFixed(2)} sec
+                            {formatSeconds(capture.time)}
                           </div>
                           <div>
                             <span className="font-medium">X:</span>{" "}
@@ -382,7 +363,7 @@ export function AnnotationDetails({
                                         className="text-xs text-yellow-700 dark:text-yellow-300"
                                       >
                                         {phase}: Started at{" "}
-                                        {data.startTime.toFixed(2)}s
+                                        {formatSeconds(data.startTime)}
                                       </div>
                                     )
                                   )}
@@ -523,7 +504,7 @@ export function AnnotationDetails({
                                     ([instrument, data]) => (
                                       <div key={instrument}>
                                         {instrument}: Started at{" "}
-                                        {data.startTime.toFixed(2)}s
+                                        {formatSeconds(data.startTime)}
                                       </div>
                                     )
                                   )}
@@ -641,7 +622,7 @@ export function AnnotationDetails({
                               </TableCell>
                               {category !== "phases" && (
                                 <TableCell className="font-mono text-xs">
-                                  {annotation.time.toFixed(2)}s
+                                  {formatSeconds(annotation.time)}
                                 </TableCell>
                               )}
                               {category === "phases" && (
@@ -650,17 +631,13 @@ export function AnnotationDetails({
                                     {annotation.phaseName}
                                   </TableCell>
                                   <TableCell className="font-mono text-xs">
-                                    {annotation.time.toFixed(2)}s
+                                    {formatSeconds(annotation.time)}
                                   </TableCell>
                                   <TableCell className="font-mono text-xs">
-                                    {annotation.endTime
-                                      ? `${annotation.endTime.toFixed(2)}s`
-                                      : "-"}
+                                    {annotation.endTime ? formatSeconds(annotation.endTime) : "-"}
                                   </TableCell>
                                   <TableCell className="font-mono text-xs">
-                                    {annotation.duration
-                                      ? `${annotation.duration.toFixed(2)}s`
-                                      : "-"}
+                                    {annotation.duration ? formatSeconds(annotation.duration) : "-"}
                                   </TableCell>
                                 </>
                               )}
@@ -689,17 +666,13 @@ export function AnnotationDetails({
                                     {annotation.position}
                                   </TableCell>
                                   <TableCell className="font-mono text-xs">
-                                    {annotation.time.toFixed(2)}s
+                                    {formatSeconds(annotation.time)}
                                   </TableCell>
                                   <TableCell className="font-mono text-xs">
-                                    {annotation.endTime
-                                      ? `${annotation.endTime.toFixed(2)}s`
-                                      : "-"}
+                                    {annotation.endTime ? formatSeconds(annotation.endTime) : "-"}
                                   </TableCell>
                                   <TableCell className="font-mono text-xs">
-                                    {annotation.duration
-                                      ? `${annotation.duration.toFixed(2)}s`
-                                      : "-"}
+                                    {annotation.duration ? formatSeconds(annotation.duration) : "-"}
                                   </TableCell>
                                 </>
                               )}

@@ -1,26 +1,7 @@
 import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
-
-type Annotation = {
-  id: string
-  timestamp: string
-  time: number
-  x: number
-  y: number
-  xPercent: number
-  yPercent: number
-  category: "phases" | "events" | "bleeds" | "instrumentation" | "anomaly"
-  phaseName?: string
-  endTime?: number
-  duration?: number
-  eventName?: string
-  interventionTime?: number
-  severity?: "mild" | "moderate" | "severe"
-  instrumentName?: string
-  position?: "Left" | "Center" | "Right"
-  description?: string
-  note?: string
-}
+import type { Annotation } from "~/types/annotation.type"
+import { formatSeconds } from "~/lib/utils"
 
 interface AnnotationTimelineProps {
   annotations: Annotation[]
@@ -67,7 +48,7 @@ export function AnnotationTimeline({
                   width: `${widthPercent}%`,
                   minWidth: annotation.duration ? "auto" : "4px",
                 }}
-                title={`${annotation.category}: ${annotation.time}s${annotation.duration ? ` - ${annotation.duration}s` : ""}`}
+                title={`${annotation.category}: ${formatSeconds(annotation.time)}${annotation.duration ? ` - ${formatSeconds(annotation.endTime)}` : ""}`}
                 onClick={() => onAnnotationClick?.(annotation.time)}
               >
                 {!annotation.duration && (
@@ -81,9 +62,9 @@ export function AnnotationTimeline({
 
           {/* Time markers */}
           <div className="absolute top-8 right-0 left-0 mt-1 flex justify-between text-xs text-muted-foreground">
-            <span>0s</span>
-            <span>{Math.floor(videoDuration / 2)}s</span>
-            <span>{videoDuration}s</span>
+            <span>{formatSeconds(0)}</span>
+            <span>{formatSeconds(Math.floor(videoDuration / 2))}</span>
+            <span>{formatSeconds(videoDuration)}</span>
           </div>
         </div>
 

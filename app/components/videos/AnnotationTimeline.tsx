@@ -25,6 +25,7 @@ type Annotation = {
 interface AnnotationTimelineProps {
   annotations: Annotation[]
   videoDuration: number // in seconds
+  onAnnotationClick?: (time: number) => void
 }
 
 const categoryColors = {
@@ -38,6 +39,7 @@ const categoryColors = {
 export function AnnotationTimeline({
   annotations,
   videoDuration,
+  onAnnotationClick,
 }: AnnotationTimelineProps) {
   return (
     <Card>
@@ -59,13 +61,14 @@ export function AnnotationTimeline({
             return (
               <div
                 key={annotation.id}
-                className={`absolute top-0 h-full ${categoryColors[annotation.category]} rounded opacity-80`}
+                className={`absolute top-0 h-full ${categoryColors[annotation.category]} rounded opacity-80 cursor-pointer hover:opacity-100 transition-opacity`}
                 style={{
                   left: `${leftPercent}%`,
                   width: `${widthPercent}%`,
                   minWidth: annotation.duration ? "auto" : "4px",
                 }}
                 title={`${annotation.category}: ${annotation.time}s${annotation.duration ? ` - ${annotation.duration}s` : ""}`}
+                onClick={() => onAnnotationClick?.(annotation.time)}
               >
                 {!annotation.duration && (
                   <div className="flex h-full w-full items-center justify-center">

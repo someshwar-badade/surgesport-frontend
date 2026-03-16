@@ -13,11 +13,13 @@ type CaptureData = {
 
 type Props = {
   readonly onCapture?: (data: CaptureData) => void
+  readonly onDurationChange?: (duration: number) => void
+  readonly seekTime?: number
 }
 
-export default function VideoPlayer({ onCapture }: Props) {
+export default function VideoPlayer({ onCapture, onDurationChange, seekTime }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const playerRef = useRef<ReactPlayer | null>(null)
+  const playerRef = useRef<any>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
   const [playing, setPlaying] = useState(false)
@@ -86,12 +88,10 @@ export default function VideoPlayer({ onCapture }: Props) {
   }
 
   useEffect(() => {
-  return () => {
-    const video = videoRef.current
-    if (!video) return
-    video.removeEventListener("timeupdate", () => {})
-  }
-}, [])
+    if (seekTime !== undefined) {
+      seekTo(seekTime)
+    }
+  }, [seekTime])
 
   return (
     <div className="w-full">
@@ -115,6 +115,7 @@ export default function VideoPlayer({ onCapture }: Props) {
 
             videoRef.current = video
             setDuration(video.duration)
+            onDurationChange?.(video.duration)
 
             const updateTime = () => {
                 setCurrentTime(video.currentTime)

@@ -5,6 +5,7 @@ import { VideoDetails } from "~/components/videos/VideoDetails"
 import { AnnotationDetails } from "~/components/videos/AnnotationDetails"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Card, CardContent } from "~/components/ui/card"
+import { NavLink } from "react-router"
 
 export default function Annotation() {
   const [capture, setCapture] = useState<any>(null)
@@ -47,6 +48,9 @@ export default function Annotation() {
           {/* Video Player Column */}
           <div className="flex items-center justify-center">
             <div className="w-full">
+              <NavLink to="/videos/annotation/view" className="text-blue-500 hover:underline">
+                    Go to annotation timeline
+                  </NavLink>
               <VideoPlayer onCapture={setCapture} />
             </div>
           </div>

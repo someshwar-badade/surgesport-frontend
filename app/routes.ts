@@ -10,7 +10,6 @@ export default [
   index("routes/home.tsx"),
   route("login", "routes/login/page.tsx"),
   route("register", "routes/register/page.tsx"),
-
   // Protected routes with their own layout
   layout("routes/protectedLayout.tsx", [
     layout("routes/layout.tsx", [

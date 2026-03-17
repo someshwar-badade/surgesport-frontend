@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useParams, useNavigate } from "react-router"
 import { getVideoById, updateVideo } from "~/lib/videoService"
-import type { Video } from "~/lib/videoService"
+import type { Video, UpdateVideoData } from "~/lib/videoService"
 import { VideoForm } from "~/components/videos/VideoForm"
 import { useToast } from "~/components/ui/toast"
 
@@ -20,7 +20,7 @@ export default function EditVideo() {
 
   if (!video) return <div>Loading...</div>
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: UpdateVideoData) => {
     await updateVideo(video.id, data)
     toast.addToast({
       title: "Updated",

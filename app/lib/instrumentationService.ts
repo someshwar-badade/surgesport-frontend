@@ -1,57 +1,70 @@
 import apiClient from "~/api/apiClient"
 
+export interface ApiResponse<T> {
+  status: boolean
+  message?: string
+  data: T
+  errors?: Record<string, string[]>
+}
+
 export interface InstrumentationAnnotation {
   id: number
-  video_id: number
-  timestamp: string
-  time: number
-  x: number
-  y: number
-  xPercent: number
-  yPercent: number
+  timestamp?: number
   instrument: string
-  action: "inserted" | "removed" | "adjusted" | "malfunctioned"
+  action: string
+  x_position?: number
+  y_position?: number
   duration?: number
-  note?: string
-  created_at: string
-  updated_at: string
+  created_at?: string
+  updated_at?: string
 }
 
 export interface CreateInstrumentationAnnotationData {
-  timestamp: string
-  time: number
-  x: number
-  y: number
-  xPercent: number
-  yPercent: number
+  timestamp?: number
   instrument: string
-  action: "inserted" | "removed" | "adjusted" | "malfunctioned"
+  action: string
+  x_position?: number
+  y_position?: number
   duration?: number
-  note?: string
 }
 
 export interface UpdateInstrumentationAnnotationData extends Partial<CreateInstrumentationAnnotationData> {}
 
-export async function getInstrumentationAnnotations(videoId: number): Promise<InstrumentationAnnotation[]> {
-  const response = await apiClient.get<InstrumentationAnnotation[]>(`/videos/${videoId}/instrumentations`)
-  return response.data
+export async function getInstrumentationAnnotations(videoId: string): Promise<InstrumentationAnnotation[]> {
+  const response = await apiClient.get<ApiResponse<InstrumentationAnnotation[]>>(`/videos/${videoId}/instrumentations`)
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Failed to fetch instrumentation annotations")
+  }
+  return response.data.data
 }
 
-export async function getInstrumentationAnnotation(videoId: number, instrumentationId: number): Promise<InstrumentationAnnotation> {
-  const response = await apiClient.get<InstrumentationAnnotation>(`/videos/${videoId}/instrumentations/${instrumentationId}`)
-  return response.data
+export async function getInstrumentationAnnotation(videoId: string, instrumentationId: number): Promise<InstrumentationAnnotation> {
+  const response = await apiClient.get<ApiResponse<InstrumentationAnnotation>>(`/videos/${videoId}/instrumentations/${instrumentationId}`)
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Instrumentation annotation not found")
+  }
+  return response.data.data
 }
 
-export async function createInstrumentationAnnotation(videoId: number, data: CreateInstrumentationAnnotationData): Promise<InstrumentationAnnotation> {
-  const response = await apiClient.post<InstrumentationAnnotation>(`/videos/${videoId}/instrumentations`, data)
-  return response.data
+export async function createInstrumentationAnnotation(videoId: string, data: CreateInstrumentationAnnotationData): Promise<InstrumentationAnnotation> {
+  const response = await apiClient.post<ApiResponse<InstrumentationAnnotation>>(`/videos/${videoId}/instrumentations`, data)
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Failed to create instrumentation annotation")
+  }
+  return response.data.data
 }
 
-export async function updateInstrumentationAnnotation(videoId: number, instrumentationId: number, data: UpdateInstrumentationAnnotationData): Promise<InstrumentationAnnotation> {
-  const response = await apiClient.put<InstrumentationAnnotation>(`/videos/${videoId}/instrumentations/${instrumentationId}`, data)
-  return response.data
+export async function updateInstrumentationAnnotation(videoId: string, instrumentationId: number, data: UpdateInstrumentationAnnotationData): Promise<InstrumentationAnnotation> {
+  const response = await apiClient.put<ApiResponse<InstrumentationAnnotation>>(`/videos/${videoId}/instrumentations/${instrumentationId}`, data)
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Failed to update instrumentation annotation")
+  }
+  return response.data.data
 }
 
-export async function deleteInstrumentationAnnotation(videoId: number, instrumentationId: number): Promise<void> {
-  await apiClient.delete(`/videos/${videoId}/instrumentations/${instrumentationId}`)
+export async function deleteInstrumentationAnnotation(videoId: string, instrumentationId: number): Promise<void> {
+  const response = await apiClient.delete<ApiResponse<null>>(`/videos/${videoId}/instrumentations/${instrumentationId}`)
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Failed to delete instrumentation annotation")
+  }
 }

@@ -1,6 +1,7 @@
 import * as React from "react"
 import { useNavigate } from "react-router"
 import { createVideo } from "~/lib/videoService"
+import type { CreateVideoData } from "~/lib/videoService"
 import { VideoForm } from "~/components/videos/VideoForm"
 import { useToast } from "~/components/ui/toast"
 import { SiteHeader } from "~/components/site-header"
@@ -9,7 +10,7 @@ export default function CreateVideo() {
   const navigate = useNavigate()
   const toast = useToast()
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: CreateVideoData) => {
     await createVideo(data)
     toast.addToast({
       title: "Created",

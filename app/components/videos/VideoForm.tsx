@@ -1,5 +1,5 @@
 import * as React from "react"
-import type { Video } from "~/lib/videoService"
+import type { Video, CreateVideoData } from "~/lib/videoService"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Field } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
@@ -7,50 +7,34 @@ import { Button } from "~/components/ui/button"
 
 interface VideoFormProps {
   readonly initialData?: Partial<Video>
-  readonly onSubmit: (data: Omit<Video, "id" | "createdAt">) => void
+  readonly onSubmit: (data: CreateVideoData) => void
   readonly onCancel?: () => void
 }
 
-const PROCEDURE_OPTIONS = ["Type A", "Type B", "Type C", "Other"]
+const PROCEDURE_OPTIONS = ["Endoscopy", "Colonoscopy", "ERCP", "Other"]
 
 export function VideoForm({
   initialData = {},
   onSubmit,
   onCancel,
 }: VideoFormProps) {
-  const [videoId, setVideoId] = React.useState(initialData.video_id || "")
   const [procedureType, setProcedureType] = React.useState(
     initialData.procedure_type || PROCEDURE_OPTIONS[0]
   )
+  const [title, setTitle] = React.useState(initialData.title || "")
   const [totalVideoTime, setTotalVideoTime] = React.useState(
-    initialData.total_video_time || ""
+    initialData.total_video_time?.toString() || ""
   )
-  const [firstEntry, setFirstEntry] = React.useState(
-    initialData.first_camera_entry_time || ""
-  )
-  const [finalExit, setFinalExit] = React.useState(
-    initialData.final_camera_exit_time || ""
-  )
-  const [exitBodyTime, setExitBodyTime] = React.useState(
-    initialData.camera_exit_body_time || ""
-  )
-  const [enterBodyTime, setEnterBodyTime] = React.useState(
-    initialData.camera_enter_body_timestamp || ""
-  )
-  const [exitBodyTimestamp, setExitBodyTimestamp] = React.useState(
-    initialData.camera_exit_body_timestamp || ""
-  )
-  const [osatScore, setOsatScore] = React.useState(
-    initialData.osat_score?.toString() || ""
-  )
+  const [videoUrl, setVideoUrl] = React.useState(initialData.video_url || "")
 
   const [errors, setErrors] = React.useState<Record<string, string>>({})
 
   const validate = () => {
     const errs: Record<string, string> = {}
-    if (!videoId) errs.video_id = "Video ID is required"
+    if (!procedureType) errs.procedure_type = "Procedure type is required"
+    if (!title) errs.title = "Title is required"
     if (!totalVideoTime) errs.total_video_time = "Total video time is required"
-    if (!osatScore) errs.osat_score = "OSAT score is required"
+    if (!videoUrl) errs.video_url = "Video URL is required"
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -59,15 +43,10 @@ export function VideoForm({
     e.preventDefault()
     if (!validate()) return
     onSubmit({
-      video_id: videoId,
       procedure_type: procedureType,
-      total_video_time: totalVideoTime,
-      first_camera_entry_time: firstEntry,
-      final_camera_exit_time: finalExit,
-      camera_exit_body_time: exitBodyTime,
-      camera_enter_body_timestamp: enterBodyTime,
-      camera_exit_body_timestamp: exitBodyTimestamp,
-      osat_score: Number(osatScore),
+      title: title,
+      total_video_time: Number(totalVideoTime),
+      video_url: videoUrl,
     })
   }
 
@@ -79,22 +58,6 @@ export function VideoForm({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Field>
-              <label htmlFor="videoId" className="text-sm font-medium">
-                Video ID
-              </label>
-              <Input
-                id="videoId"
-                type="text"
-                value={videoId}
-                onChange={(e) => setVideoId(e.target.value)}
-                placeholder="Enter video ID"
-              />
-              {errors.video_id && (
-                <p className="mt-1 text-xs text-red-500">{errors.video_id}</p>
-              )}
-            </Field>
-
             <Field>
               <label className="text-sm font-medium">Procedure Type</label>
               <select
@@ -108,15 +71,38 @@ export function VideoForm({
                   </option>
                 ))}
               </select>
+              {errors.procedure_type && (
+                <p className="mt-1 text-xs text-red-500">{errors.procedure_type}</p>
+              )}
             </Field>
 
             <Field>
-              <label className="text-sm font-medium">Total Video Time</label>
+              <label htmlFor="title" className="text-sm font-medium">
+                Title
+              </label>
               <Input
+                id="title"
                 type="text"
-                placeholder="e.g. 00:05:30"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter video title"
+              />
+              {errors.title && (
+                <p className="mt-1 text-xs text-red-500">{errors.title}</p>
+              )}
+            </Field>
+
+            <Field>
+              <label htmlFor="totalVideoTime" className="text-sm font-medium">
+                Total Video Time (seconds)
+              </label>
+              <Input
+                id="totalVideoTime"
+                type="number"
                 value={totalVideoTime}
                 onChange={(e) => setTotalVideoTime(e.target.value)}
+                placeholder="e.g. 600"
+                min="1"
               />
               {errors.total_video_time && (
                 <p className="mt-1 text-xs text-red-500">
@@ -126,72 +112,18 @@ export function VideoForm({
             </Field>
 
             <Field>
-              <label className="text-sm font-medium">
-                First Camera Entry Time
+              <label htmlFor="videoUrl" className="text-sm font-medium">
+                Video URL
               </label>
               <Input
-                type="datetime-local"
-                value={firstEntry}
-                onChange={(e) => setFirstEntry(e.target.value)}
+                id="videoUrl"
+                type="url"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://example.com/video.mp4"
               />
-            </Field>
-
-            <Field>
-              <label className="text-sm font-medium">
-                Final Camera Exit Time
-              </label>
-              <Input
-                type="datetime-local"
-                value={finalExit}
-                onChange={(e) => setFinalExit(e.target.value)}
-              />
-            </Field>
-
-            <Field>
-              <label className="text-sm font-medium">
-                Camera Exit Body Time
-              </label>
-              <Input
-                type="datetime-local"
-                value={exitBodyTime}
-                onChange={(e) => setExitBodyTime(e.target.value)}
-              />
-            </Field>
-
-            <Field>
-              <label className="text-sm font-medium">
-                Camera Enter Body Timestamp
-              </label>
-              <Input
-                type="datetime-local"
-                value={enterBodyTime}
-                onChange={(e) => setEnterBodyTime(e.target.value)}
-              />
-            </Field>
-
-            <Field>
-              <label className="text-sm font-medium">
-                Camera Exit Body Timestamp
-              </label>
-              <Input
-                type="datetime-local"
-                value={exitBodyTimestamp}
-                onChange={(e) => setExitBodyTimestamp(e.target.value)}
-              />
-            </Field>
-
-            <Field>
-              <label className="text-sm font-medium">OSAT Score</label>
-              <Input
-                type="number"
-                min={0}
-                max={100}
-                value={osatScore}
-                onChange={(e) => setOsatScore(e.target.value)}
-                placeholder="0-100"
-              />
-              {errors.osat_score && (
-                <p className="mt-1 text-xs text-red-500">{errors.osat_score}</p>
+              {errors.video_url && (
+                <p className="mt-1 text-xs text-red-500">{errors.video_url}</p>
               )}
             </Field>
           </div>

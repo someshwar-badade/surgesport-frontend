@@ -1,77 +1,99 @@
+import apiClient from "~/api/apiClient"
+
 export interface Video {
   id: string
-  video_id: string
+  procedure_type?: string
+  title?: string
+  total_video_time?: string
+  first_camera_entry_time?: string
+  final_camera_exit_time?: string
+  camera_enter_body_timestamp?: string
+  camera_exit_body_timestamp?: string
+  osat_score?: number
+  video_url?: string
+  created_at?: string
+  updated_at?: string
+  total_video_time_formatted?: string
+  first_camera_entry_time_formatted?: string
+  final_camera_exit_time_formatted?: string
+}
+
+export interface ApiResponse<T> {
+  status: boolean
+  message?: string
+  data: T
+  errors?: Record<string, string[]>
+}
+
+export interface CreateVideoData {
   procedure_type: string
+  title: string
   total_video_time: string
-  first_camera_entry_time: string
-  final_camera_exit_time: string
-  camera_exit_body_time: string
-  camera_enter_body_timestamp: string
-  camera_exit_body_timestamp: string
-  osat_score: number
-  createdAt: string
+  video_url: string
+  first_camera_entry_time?: string
+  final_camera_exit_time?: string
+  camera_enter_body_timestamp?: string
+  camera_exit_body_timestamp?: string
+  osat_score?: number
 }
 
-const STORAGE_KEY = "videos"
-
-function readStorage(): Video[] {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return []
-  try {
-    return JSON.parse(raw) as Video[]
-  } catch {
-    return []
-  }
-}
-
-function writeStorage(videos: Video[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(videos))
-}
-
-function delay<T>(result: T, ms = 300): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(result), ms))
-}
+export interface UpdateVideoData extends Partial<CreateVideoData> {}
 
 export async function getVideos(): Promise<Video[]> {
-  const videos = readStorage()
-  return delay(videos)
+  const response = await apiClient.get<ApiResponse<unknown>>("/videos")
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Failed to fetch videos")
+  }
+
+  const payload = response.data.data
+
+  // Normalize response payload to an array of videos.
+  if (Array.isArray(payload)) {
+    return payload as Video[]
+  }
+
+  if (payload && typeof payload === "object") {
+    // Some APIs wrap list data in a `videos` or `data` key
+    if (Array.isArray((payload as any).videos)) {
+      return (payload as any).videos as Video[]
+    }
+    if (Array.isArray((payload as any).data)) {
+      return (payload as any).data as Video[]
+    }
+  }
+
+  // Fallback: return empty list and log to help debugging
+  console.warn("Unexpected videos payload format", payload)
+  return []
 }
 
-export async function getVideoById(id: string): Promise<Video | undefined> {
-  const videos = readStorage()
-  return delay(videos.find((v) => v.id === id))
+export async function getVideoById(id: string): Promise<Video> {
+  const response = await apiClient.get<ApiResponse<Video>>(`/videos/${id}`)
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Video not found")
+  }
+  return response.data.data
 }
 
-export async function createVideo(
-  data: Omit<Video, "id" | "createdAt">
-): Promise<Video> {
-  const videos = readStorage()
-  const newVideo: Video = {
-    ...data,
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-  } as any
-  videos.unshift(newVideo)
-  writeStorage(videos)
-  return delay(newVideo)
+export async function createVideo(data: CreateVideoData): Promise<Video> {
+  const response = await apiClient.post<ApiResponse<Video>>("/videos", data)
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Failed to create video")
+  }
+  return response.data.data
 }
 
-export async function updateVideo(
-  id: string,
-  data: Partial<Omit<Video, "id" | "createdAt">>
-): Promise<Video | undefined> {
-  const videos = readStorage()
-  const idx = videos.findIndex((v) => v.id === id)
-  if (idx === -1) return delay(undefined)
-  const updated = { ...videos[idx], ...data }
-  videos[idx] = updated
-  writeStorage(videos)
-  return delay(updated)
+export async function updateVideo(id: string, data: UpdateVideoData): Promise<Video> {
+  const response = await apiClient.put<ApiResponse<Video>>(`/videos/${id}`, data)
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Failed to update video")
+  }
+  return response.data.data
 }
 
 export async function deleteVideo(id: string): Promise<void> {
-  let videos = readStorage()
-  videos = videos.filter((v) => v.id !== id)
-  writeStorage(videos)
-  return delay(undefined as any)
+  const response = await apiClient.delete<ApiResponse<null>>(`/videos/${id}`)
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Failed to delete video")
+  }
 }

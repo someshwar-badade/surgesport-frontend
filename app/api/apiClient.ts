@@ -11,7 +11,7 @@ interface ApiErrorResponse {
 }
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: "http://127.0.0.1:8000/api",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -21,7 +21,7 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem("loggedToken")
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -43,7 +43,7 @@ apiClient.interceptors.response.use(
 
     // Check if it's a 401 error and not from login endpoint
     if (status === 401 && url && !url.includes("/login")) {
-      localStorage.removeItem("token")
+      localStorage.removeItem("loggedToken")
       window.location.href = "/login"
     }
 

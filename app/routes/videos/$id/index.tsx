@@ -24,7 +24,7 @@ export default function ViewVideo() {
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <dt className="font-medium">Video ID</dt>
-            <dd>{video.video_id}</dd>
+            <dd>{video.id}</dd>
           </div>
           <div>
             <dt className="font-medium">Procedure Type</dt>
@@ -46,10 +46,7 @@ export default function ViewVideo() {
             <dt className="font-medium">Final Camera Exit</dt>
             <dd>{video.final_camera_exit_time}</dd>
           </div>
-          <div>
-            <dt className="font-medium">Camera Exit Body Time</dt>
-            <dd>{video.camera_exit_body_time}</dd>
-          </div>
+          
           <div>
             <dt className="font-medium">Camera Enter Body Timestamp</dt>
             <dd>{video.camera_enter_body_timestamp}</dd>
@@ -58,10 +55,10 @@ export default function ViewVideo() {
             <dt className="font-medium">Camera Exit Body Timestamp</dt>
             <dd>{video.camera_exit_body_timestamp}</dd>
           </div>
-          <div className="col-span-full">
+          {/* <div className="col-span-full">
             <dt className="font-medium">Created At</dt>
             <dd>{new Date(video.createdAt).toLocaleString()}</dd>
-          </div>
+          </div> */}
         </dl>
       </div>
       <div className="flex gap-2">

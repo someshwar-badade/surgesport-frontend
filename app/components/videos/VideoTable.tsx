@@ -27,13 +27,15 @@ export function VideoTable({
   const [search, setSearch] = React.useState("")
   const [page, setPage] = React.useState(1)
 
+  const safeVideos = React.useMemo(() => (Array.isArray(videos) ? videos : []), [videos])
+
   const filtered = React.useMemo(() => {
-    return videos.filter(
+    return safeVideos.filter(
       (v) =>
-        v.video_id.toLowerCase().includes(search.toLowerCase()) ||
-        v.procedure_type.toLowerCase().includes(search.toLowerCase())
+        (v.title?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
+        (v.procedure_type?.toLowerCase().includes(search.toLowerCase()) ?? false)
     )
-  }, [search, videos])
+  }, [search, safeVideos])
 
   const paged = React.useMemo(() => {
     const start = (page - 1) * PAGE_SIZE
@@ -62,10 +64,10 @@ export function VideoTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Video ID</TableHead>
+            <TableHead>Title</TableHead>
             <TableHead>Procedure</TableHead>
-            <TableHead>Total Time</TableHead>
-            <TableHead>OSAT</TableHead>
+            <TableHead>Duration</TableHead>
+            <TableHead>Video URL</TableHead>
             <TableHead>Created</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -73,12 +75,25 @@ export function VideoTable({
         <TableBody>
           {paged.map((v) => (
             <TableRow key={v.id}>
-              <TableCell>{v.video_id}</TableCell>
-              <TableCell>{v.procedure_type}</TableCell>
-              <TableCell>{v.total_video_time}</TableCell>
-              <TableCell>{v.osat_score}</TableCell>
+              <TableCell>{v.title || "N/A"}</TableCell>
+              <TableCell>{v.procedure_type || "N/A"}</TableCell>
+              <TableCell>{v.total_video_time_formatted ? `${v.total_video_time_formatted}` : "N/A"}</TableCell>
               <TableCell>
-                {new Date(v.createdAt).toLocaleDateString()}
+                {v.video_url ? (
+                  <a
+                    href={v.video_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    View Video
+                  </a>
+                ) : (
+                  "N/A"
+                )}
+              </TableCell>
+              <TableCell>
+                {v.created_at ? new Date(v.created_at).toLocaleDateString() : "N/A"}
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">

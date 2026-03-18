@@ -16,10 +16,10 @@ export default [
       route("dashboard", "routes/dashboard.tsx"),
       route("videos", "routes/videos/index.tsx"),
       route("videos/create", "routes/videos/create.tsx"),
-      route("videos/$id", "routes/videos/$id.tsx"),
-      route("videos/$id/edit", "routes/videos/$id.edit.tsx"),
       route("videos/annotation", "routes/videos/annotation.tsx"),
       route("videos/annotation/view", "routes/videos/view.tsx"),
+      route("videos/:id", "routes/videos/$id/index.tsx"),
+      route("videos/:id/edit", "routes/videos/$id/edit.tsx"),
     ]),
   ]),
 ] satisfies RouteConfig

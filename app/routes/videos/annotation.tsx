@@ -10,19 +10,15 @@ import { NavLink } from "react-router"
 export default function Annotation() {
   const [capture, setCapture] = useState<any>(null)
 
-  // Mock video data - in a real app, this would come from props or state
+  // Mock video data - updated to match new Video interface
   const mockVideo = {
     id: "1",
-    video_id: "VID-001",
-    procedure_type: "Type A",
-    total_video_time: "00:05:30",
-    first_camera_entry_time: "2024-01-01T10:00:00Z",
-    final_camera_exit_time: "2024-01-01T10:05:30Z",
-    camera_exit_body_time: "",
-    camera_enter_body_timestamp: "",
-    camera_exit_body_timestamp: "",
-    osat_score: 85,
-    createdAt: "2024-01-01T09:00:00Z",
+    procedure_type: "Endoscopy",
+    title: "Sample Endoscopy Video",
+    total_video_time: 330, // 5.5 minutes in seconds
+    video_url: "https://example.com/sample-video.mp4",
+    created_at: "2024-01-01T09:00:00Z",
+    updated_at: "2024-01-01T09:00:00Z",
   }
 
   const handleSaveAnnotation = (annotation: any) => {

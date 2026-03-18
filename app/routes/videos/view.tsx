@@ -203,7 +203,7 @@ export default function ViewAnnotation() {
                   value="video_details"
                   className="space-y-4"
                 >
-                  <VideoDetails video={mockVideo} />
+                  {/* <VideoDetails video={mockVideo} /> */}
                 </TabsContent>
                 <TabsContent key="annotations" value="annotations">
                   <AnnotationDetails

@@ -1,6 +1,6 @@
 // Initialize sample annotations for development
 // import { createAnnotation } from "~/lib/annotationService"
-import { annotationService } from "~/lib/annotationService"
+import type {createAnnotation} from "~/lib/annotationService"
 
 export async function initializeSampleAnnotations() {
   const sampleAnnotations = [
@@ -134,7 +134,7 @@ export async function initializeSampleAnnotations() {
 
   for (const annotation of sampleAnnotations) {
     try {
-      await annotationService.createAnnotation(annotation)
+      await createAnnotation(annotation)
     } catch (error) {
       console.log("Annotation already exists or error:", error)
     }

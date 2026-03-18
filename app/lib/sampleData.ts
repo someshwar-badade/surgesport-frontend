@@ -1,6 +1,6 @@
 // Initialize sample annotations for development
 // import { createAnnotation } from "~/lib/annotationService"
-import type {createAnnotation} from "~/lib/annotationService"
+import  {createAnnotation} from "~/lib/annotationService"
 
 export async function initializeSampleAnnotations() {
   const sampleAnnotations = [

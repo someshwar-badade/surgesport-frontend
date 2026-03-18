@@ -70,6 +70,9 @@ export default function VideoPlayer({ onCapture, onDurationChange, seekTime }: P
   const handleVideoClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!videoRef.current || !onCapture) return
 
+     // Ignore if click comes from controls
+    if ((e.target as HTMLElement).closest("button, input, select")) return
+    setPlaying((prev) => !prev)
     const rect = e.currentTarget.getBoundingClientRect()
 
     const x = e.clientX - rect.left
@@ -105,10 +108,9 @@ export default function VideoPlayer({ onCapture, onDurationChange, seekTime }: P
           src="/videos/video-2.mp4"
           width="100%"
           height="100%"
-          controls={false}
           playing={playing}
           playbackRate={playbackRate}
-          
+          controls={false}
           
           onLoadedMetadata={(e: any) => {
             const video = e.target as HTMLVideoElement
@@ -118,10 +120,17 @@ export default function VideoPlayer({ onCapture, onDurationChange, seekTime }: P
             onDurationChange?.(video.duration)
 
             const updateTime = () => {
-                setCurrentTime(video.currentTime)
-              }
+              setCurrentTime(video.currentTime)
+            }
 
-              video.addEventListener("timeupdate", updateTime)
+            video.addEventListener("timeupdate", updateTime)
+
+            // ✅ CLEANUP
+            video.onended = () => setPlaying(false)
+
+            return () => {
+              video.removeEventListener("timeupdate", updateTime)
+            }
           }}
         />
       </div>

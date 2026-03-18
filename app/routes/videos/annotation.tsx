@@ -15,7 +15,7 @@ export default function Annotation() {
     id: "1",
     procedure_type: "Endoscopy",
     title: "Sample Endoscopy Video",
-    total_video_time: 330, // 5.5 minutes in seconds
+    total_video_time: "00:05:05", // 5.5 minutes in seconds
     video_url: "https://example.com/sample-video.mp4",
     created_at: "2024-01-01T09:00:00Z",
     updated_at: "2024-01-01T09:00:00Z",

@@ -1,5 +1,6 @@
 "use client"
 
+import { useNavigate } from "react-router"
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -24,6 +25,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "~/components/ui/sidebar"
+import { useAuth } from "~/context/authContext"
+import { logout as apiLogout } from "~/lib/authService"
 
 export function NavUser({
   user,
@@ -35,6 +38,24 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const { logout: contextLogout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    try {
+      // Call API logout
+      await apiLogout()
+    } catch (error) {
+      console.error("API logout failed:", error)
+      // Continue with context logout even if API call fails
+    }
+
+    // Clear local auth state
+    contextLogout()
+
+    // Navigate to login page
+    navigate("/login")
+  }
 
   return (
     <SidebarMenu>
@@ -94,7 +115,7 @@ export function NavUser({
               </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

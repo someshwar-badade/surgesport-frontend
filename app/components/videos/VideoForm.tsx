@@ -23,18 +23,79 @@ export function VideoForm({
   )
   const [title, setTitle] = React.useState(initialData.title || "")
   const [totalVideoTime, setTotalVideoTime] = React.useState(
-    initialData.total_video_time?.toString() || ""
+    initialData.total_video_time || ""
+  )
+  const [firstCameraEntryTime, setFirstCameraEntryTime] = React.useState(
+    initialData.first_camera_entry_time || ""
+  )
+  const [finalCameraExitTime, setFinalCameraExitTime] = React.useState(
+    initialData.final_camera_exit_time || ""
+  )
+  
+  const [cameraEnterBodyTimestamp, setCameraEnterBodyTimestamp] = React.useState(
+    initialData.camera_enter_body_timestamp?.toString() || ""
+  )
+  const [cameraExitBodyTimestamp, setCameraExitBodyTimestamp] = React.useState(
+    initialData.camera_exit_body_timestamp?.toString() || ""
+  )
+  const [osatScore, setOsatScore] = React.useState(
+    initialData.osat_score?.toString() || ""
   )
   const [videoUrl, setVideoUrl] = React.useState(initialData.video_url || "")
 
   const [errors, setErrors] = React.useState<Record<string, string>>({})
 
+  const isValidTime = (value: string) => {
+    if (!value) return true
+    // Accept HH:MM:SS (24hr) format
+    return /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/.test(value)
+  }
+
+  const isValidUrl = (value: string) => {
+    try {
+      // eslint-disable-next-line no-new
+      new URL(value)
+      return true
+    } catch {
+      return false
+    }
+  }
+
   const validate = () => {
     const errs: Record<string, string> = {}
     if (!procedureType) errs.procedure_type = "Procedure type is required"
     if (!title) errs.title = "Title is required"
-    if (!totalVideoTime) errs.total_video_time = "Total video time is required"
-    if (!videoUrl) errs.video_url = "Video URL is required"
+    if (!totalVideoTime) {
+      errs.total_video_time = "Total video time is required"
+    } else if (!isValidTime(totalVideoTime)) {
+      errs.total_video_time = "Total video time must be in HH:MM:SS format"
+    }
+
+    if (firstCameraEntryTime && !isValidTime(firstCameraEntryTime)) {
+      errs.first_camera_entry_time = "Must be in HH:MM:SS format"
+    }
+    if (finalCameraExitTime && !isValidTime(finalCameraExitTime)) {
+      errs.final_camera_exit_time = "Must be in HH:MM:SS format"
+    }
+    
+
+    // if (cameraEnterBodyTimestamp && Number.isNaN(Number(cameraEnterBodyTimestamp))) {
+    //   errs.camera_enter_body_timestamp = "Must be a number"
+    // }
+    // if (cameraExitBodyTimestamp && Number.isNaN(Number(cameraExitBodyTimestamp))) {
+    //   errs.camera_exit_body_timestamp = "Must be a number"
+    // }
+
+    if (osatScore && Number.isNaN(Number(osatScore))) {
+      errs.osat_score = "Must be a number"
+    }
+
+    if (!videoUrl) {
+      errs.video_url = "Video URL is required"
+    } else if (!isValidUrl(videoUrl)) {
+      errs.video_url = "Video URL must be valid"
+    }
+
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -45,10 +106,42 @@ export function VideoForm({
     onSubmit({
       procedure_type: procedureType,
       title: title,
-      total_video_time: Number(totalVideoTime),
+      total_video_time: totalVideoTime,
+      first_camera_entry_time: firstCameraEntryTime || undefined,
+      final_camera_exit_time: finalCameraExitTime || undefined,
+      camera_enter_body_timestamp: cameraEnterBodyTimestamp
+        ? cameraEnterBodyTimestamp.toString()
+        : undefined,
+      camera_exit_body_timestamp: cameraExitBodyTimestamp
+        ? cameraExitBodyTimestamp.toString()
+        : undefined,
+      osat_score: osatScore ? Number(osatScore) : undefined,
       video_url: videoUrl,
     })
   }
+
+  const formatTime = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 6);
+
+  const h = digits.substring(0, 2);
+  const m = digits.substring(2, 4);
+  const s = digits.substring(4, 6);
+
+  let formatted = "";
+
+  if (h) formatted += h;
+  if (m) formatted += ":" + m;
+  if (s) formatted += ":" + s;
+
+  return formatted;
+};
+
+const handleTimeChange = (
+  value: string,
+  setter: React.Dispatch<React.SetStateAction<string>>
+) => {
+  setter(formatTime(value));
+};
 
   return (
     <Card className="mx-auto w-full max-w-4xl">
@@ -86,6 +179,7 @@ export function VideoForm({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter video title"
+                maxLength={50}
               />
               {errors.title && (
                 <p className="mt-1 text-xs text-red-500">{errors.title}</p>
@@ -94,15 +188,14 @@ export function VideoForm({
 
             <Field>
               <label htmlFor="totalVideoTime" className="text-sm font-medium">
-                Total Video Time (seconds)
+                Total Video Time (HH:MM:SS)
               </label>
               <Input
                 id="totalVideoTime"
-                type="number"
+                type="text"
                 value={totalVideoTime}
-                onChange={(e) => setTotalVideoTime(e.target.value)}
-                placeholder="e.g. 600"
-                min="1"
+                onChange={(e) => handleTimeChange(e.target.value, setTotalVideoTime)}
+                placeholder="e.g. 00:10:00"
               />
               {errors.total_video_time && (
                 <p className="mt-1 text-xs text-red-500">
@@ -126,6 +219,106 @@ export function VideoForm({
                 <p className="mt-1 text-xs text-red-500">{errors.video_url}</p>
               )}
             </Field>
+
+            <Field>
+              <label htmlFor="firstCameraEntryTime" className="text-sm font-medium">
+                First Camera Entry Time (HH:MM:SS)
+              </label>
+              <Input
+                id="firstCameraEntryTime"
+                type="text"
+                value={firstCameraEntryTime}
+                onChange={(e) => handleTimeChange(e.target.value, setFirstCameraEntryTime)}
+                placeholder="e.g. 00:00:10"
+              />
+              {errors.first_camera_entry_time && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.first_camera_entry_time}
+                </p>
+              )}
+            </Field>
+
+            <Field>
+              <label htmlFor="finalCameraExitTime" className="text-sm font-medium">
+                Final Camera Exit Time (HH:MM:SS)
+              </label>
+              <Input
+                id="finalCameraExitTime"
+                type="text"
+                value={finalCameraExitTime}
+                onChange={(e) => handleTimeChange(e.target.value, setFinalCameraExitTime)}
+                placeholder="e.g. 00:09:50"
+              />
+              {errors.final_camera_exit_time && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.final_camera_exit_time}
+                </p>
+              )}
+            </Field>
+
+            <Field>
+              <label
+                htmlFor="cameraEnterBodyTimestamp"
+                className="text-sm font-medium"
+              >
+                Camera Enter Body Timestamp
+              </label>
+              <Input
+                id="cameraEnterBodyTimestamp"
+                type="datetime-local"
+                value={cameraEnterBodyTimestamp}
+                onChange={(e) => setCameraEnterBodyTimestamp(e.target.value)}
+                placeholder=""
+                min="0"
+              />
+              {errors.camera_enter_body_timestamp && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.camera_enter_body_timestamp}
+                </p>
+              )}
+            </Field>
+
+            <Field>
+              <label
+                htmlFor="cameraExitBodyTimestamp"
+                className="text-sm font-medium"
+              >
+                
+                Camera Exit Body Timestamp
+              </label>
+              <Input
+                id="cameraExitBodyTimestamp"
+                type="datetime-local"
+                value={cameraExitBodyTimestamp}
+                onChange={(e) => setCameraExitBodyTimestamp(e.target.value)}
+                placeholder="e.g. 130"
+                min="0"
+              />
+              {errors.camera_exit_body_timestamp && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.camera_exit_body_timestamp}
+                </p>
+              )}
+            </Field>
+
+            <Field>
+              <label htmlFor="osatScore" className="text-sm font-medium">
+                OSAT Score (numeric)
+              </label>
+              <Input
+                id="osatScore"
+                type="number"
+                value={osatScore}
+                onChange={(e) => setOsatScore(e.target.value)}
+                placeholder="e.g. 85"
+                min="0"
+              />
+              {errors.osat_score && (
+                <p className="mt-1 text-xs text-red-500">{errors.osat_score}</p>
+              )}
+            </Field>
+
+            
           </div>
 
           <div className="flex justify-end gap-4">

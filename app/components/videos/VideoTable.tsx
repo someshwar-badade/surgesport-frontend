@@ -27,13 +27,15 @@ export function VideoTable({
   const [search, setSearch] = React.useState("")
   const [page, setPage] = React.useState(1)
 
+  const safeVideos = React.useMemo(() => (Array.isArray(videos) ? videos : []), [videos])
+
   const filtered = React.useMemo(() => {
-    return videos.filter(
+    return safeVideos.filter(
       (v) =>
         (v.title?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
         (v.procedure_type?.toLowerCase().includes(search.toLowerCase()) ?? false)
     )
-  }, [search, videos])
+  }, [search, safeVideos])
 
   const paged = React.useMemo(() => {
     const start = (page - 1) * PAGE_SIZE
@@ -75,7 +77,7 @@ export function VideoTable({
             <TableRow key={v.id}>
               <TableCell>{v.title || "N/A"}</TableCell>
               <TableCell>{v.procedure_type || "N/A"}</TableCell>
-              <TableCell>{v.total_video_time ? `${v.total_video_time}s` : "N/A"}</TableCell>
+              <TableCell>{v.total_video_time_formatted ? `${v.total_video_time_formatted}` : "N/A"}</TableCell>
               <TableCell>
                 {v.video_url ? (
                   <a

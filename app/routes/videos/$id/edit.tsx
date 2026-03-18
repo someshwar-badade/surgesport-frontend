@@ -11,10 +11,43 @@ export default function EditVideo() {
   const navigate = useNavigate()
   const toast = useToast()
 
+  const toDateTimeLocal = (value?: string | Date) => {
+    if (!value) return ""
+
+    const date = new Date(value)
+
+    // Fix timezone offset
+    const offset = date.getTimezoneOffset()
+    const localDate = new Date(date.getTime() - offset * 60000)
+
+    return localDate.toISOString().slice(0, 16)
+  }
+
   React.useEffect(() => {
     if (!id) return
     getVideoById(id).then((v) => {
-      if (v) setVideo(v)
+      if (v) {
+        //set formated times for display
+        if (v.total_video_time_formatted) {
+          v.total_video_time = v.total_video_time_formatted
+        }
+        if (v.first_camera_entry_time_formatted) {
+          v.first_camera_entry_time = v.first_camera_entry_time_formatted
+        }
+        if (v.final_camera_exit_time_formatted) {
+          v.final_camera_exit_time = v.final_camera_exit_time_formatted
+        }
+         if (v.camera_enter_body_timestamp) {
+          v.camera_enter_body_timestamp = toDateTimeLocal(v.camera_enter_body_timestamp)
+        }
+         if (v.camera_exit_body_timestamp) {
+          v.camera_exit_body_timestamp = toDateTimeLocal(v.camera_exit_body_timestamp)
+        }
+        //camera_enter_body_timestamp
+
+
+        setVideo(v)
+      }
     })
   }, [id])
 

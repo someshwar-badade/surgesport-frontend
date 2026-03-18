@@ -4,6 +4,7 @@ import { getVideoById, updateVideo } from "~/lib/videoService"
 import type { Video, UpdateVideoData } from "~/lib/videoService"
 import { VideoForm } from "~/components/videos/VideoForm"
 import { useToast } from "~/components/ui/toast"
+import { SiteHeader } from "~/components/site-header"
 
 export default function EditVideo() {
   const { id } = useParams()
@@ -65,12 +66,21 @@ export default function EditVideo() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-semibold">Edit Video</h1>
-      <VideoForm
-        initialData={video}
-        onSubmit={handleSubmit}
-        onCancel={() => navigate(`/videos/${video.id}`)}
-      />
+          <SiteHeader
+            breadcrumbs={[
+              { label: "Dashboard", href: "/dashboard" },
+              { label: "Videos", href: "/videos" },
+              { label: "Edit Video" },
+            ]}
+          />
+          <div className="w-full flex-1 p-6">
+      
+          <VideoForm
+            initialData={video}
+            onSubmit={handleSubmit}
+            onCancel={() => navigate(`/videos/${video.id}`)}
+          />
+      </div>
     </div>
   )
 }

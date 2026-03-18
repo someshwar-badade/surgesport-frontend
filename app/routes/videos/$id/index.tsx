@@ -1,5 +1,6 @@
 import * as React from "react"
 import { useParams, useNavigate } from "react-router"
+import { SiteHeader } from "~/components/site-header"
 import { getVideoById } from "~/lib/videoService"
 import type { Video } from "~/lib/videoService"
 
@@ -18,8 +19,16 @@ export default function ViewVideo() {
   if (!video) return <div>Loading...</div>
 
   return (
+    <div>
+              <SiteHeader
+                breadcrumbs={[
+                  { label: "Dashboard", href: "/dashboard" },
+                  { label: "Videos", href: "/videos" },
+                  { label: "Video Details" },
+                ]}
+              />
+              <div className="w-full flex-1 p-6">
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">View Video</h1>
       <div className="rounded bg-white p-4 shadow">
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -75,6 +84,8 @@ export default function ViewVideo() {
           Back
         </button>
       </div>
+    </div>
+    </div>
     </div>
   )
 }

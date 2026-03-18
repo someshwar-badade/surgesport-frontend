@@ -21,16 +21,16 @@ export default function VideoList() {
   }, [])
 
   const handleDelete = async (id: string) => {
-    const ok = globalThis.confirm("Are you sure you want to delete this video?")
-    if (!ok) return
-    await deleteVideo(id)
-    setVideos((v) => v.filter((x) => x.id !== id))
-    toast.addToast({
-      title: "Deleted",
-      description: "Video was removed",
-      variant: "success",
-    })
-  }
+  await deleteVideo(id)
+
+  setVideos((v) => v.filter((x) => x.id !== id))
+
+  toast.addToast({
+    title: "Deleted",
+    description: "Video was removed",
+    variant: "success",
+  })
+}
 
   if (loading) {
     return <div>Loading...</div>

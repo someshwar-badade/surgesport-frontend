@@ -8,6 +8,17 @@ import {
   TableHead,
   TableCell,
 } from "~/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog"
 
 interface VideoTableProps {
   readonly videos: Video[]
@@ -97,14 +108,14 @@ export function VideoTable({
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  {onView && (
+                  {/* {onView && (
                     <button
                       onClick={() => onView(v.id)}
                       className="text-blue-600 hover:underline"
                     >
                       View
                     </button>
-                  )}
+                  )} */}
                   {onEdit && (
                     <button
                       onClick={() => onEdit(v.id)}
@@ -114,12 +125,31 @@ export function VideoTable({
                     </button>
                   )}
                   {onDelete && (
-                    <button
-                      onClick={() => onDelete(v.id)}
-                      className="text-red-600 hover:underline"
-                    >
-                      Delete
-                    </button>
+                    <AlertDialog>
+  <AlertDialogTrigger asChild>
+    <button className="text-red-500">Delete</button>
+  </AlertDialogTrigger>
+
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This action cannot be undone. This will permanently delete the video.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+      <AlertDialogAction
+        onClick={() => onDelete(v.id)}
+        className="bg-red-600 hover:bg-red-700"
+      >
+        Delete
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
                   )}
                 </div>
               </TableCell>

@@ -1,6 +1,6 @@
-import { useContext } from "react"
-import { Navigate } from "react-router"
-import { AuthContext, useAuth } from "~/context/authContext"
+import { useLocation, Navigate } from "react-router"
+import { useAuth } from "~/context/authContext"
+import { getDefaultRouteForRole, isPathAllowedForRole } from "~/lib/roles"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -8,9 +8,16 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user } = useAuth()
+  const location = useLocation()
 
   if (!user) {
     return <Navigate to="/login" replace />
+  }
+
+  const roleId = user.role_id
+  if (!isPathAllowedForRole(roleId, location.pathname)) {
+    // Redirect users to the first page they can access.
+    return <Navigate to={getDefaultRouteForRole(roleId)} replace />
   }
 
   return <>{children}</>

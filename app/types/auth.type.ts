@@ -3,7 +3,11 @@ export interface User {
   id: string | number
   name: string
   email: string
-  // add other user fields
+  /**
+   * Role identifier used for authorization.
+   * 1 = Admin, 2 = Student, 3 = Researcher
+   */
+  role_id?: number
 }
 
 export interface LoginData {
@@ -21,6 +25,7 @@ export interface RegisterData {
   email: string
   password: string
   password_confirmation?: string
+  role_id?: number | string
 }
 
 export interface AuthContextType {

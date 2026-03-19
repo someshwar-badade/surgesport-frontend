@@ -31,6 +31,7 @@ interface AnnotationDetailsProps {
   readonly annotations?: Annotation[]
   readonly isViewMode?: boolean
   readonly videoId?: string
+  readonly onAnnotationTypeChange?: (type: string) => void
 }
 
 export function AnnotationDetails({
@@ -40,6 +41,7 @@ export function AnnotationDetails({
   annotations: propAnnotations,
   isViewMode = false,
   videoId = "1",
+  onAnnotationTypeChange,
 }: AnnotationDetailsProps) {
   const [annotations, setAnnotations] = React.useState<Annotation[]>(
     propAnnotations || []
@@ -62,6 +64,13 @@ export function AnnotationDetails({
   const [activeInstruments, setActiveInstruments] = React.useState<{
     [key: string]: { startTime: number; startAnnotation: Annotation }
   }>({})
+
+  const changeAnnotationType = (category: Annotation["category"]) => {
+    if (onAnnotationTypeChange) {
+      console.log("Changing annotation type to:", category)
+      onAnnotationTypeChange(category)
+    }
+  }
 
   const handleSaveAnnotation = (category: Annotation["category"]) => {
     if (!capture) return
@@ -248,23 +257,23 @@ export function AnnotationDetails({
         <Tabs defaultValue="phases" className="w-full">
           <div className="overflow-x-auto">
             <TabsList className="inline-flex h-10 w-max min-w-full items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
-              <TabsTrigger value="phases" className="whitespace-nowrap ">
-                <span className="text-blue-500">Phases ({getAnnotationsByCategory("phases").length})</span>
+              <TabsTrigger value="phases" className="whitespace-nowrap " onClick={() => changeAnnotationType("phases")}>
+                <span className="text-blue-500" >Phases ({getAnnotationsByCategory("phases").length})</span>
               </TabsTrigger>
-              <TabsTrigger value="events" className="whitespace-nowrap">
+              <TabsTrigger value="events" className="whitespace-nowrap" onClick={() => changeAnnotationType("events")}>
                 <span className="text-green-500">Events ({getAnnotationsByCategory("events").length})</span>
               </TabsTrigger>
-              <TabsTrigger value="bleeds" className="whitespace-nowrap">
+              <TabsTrigger value="bleeds" className="whitespace-nowrap" onClick={() => changeAnnotationType("bleeds")}>
                 <span className="text-red-500">Bleeds ({getAnnotationsByCategory("bleeds").length})</span>
               </TabsTrigger>
               <TabsTrigger
                 value="instrumentation"
-                className="whitespace-nowrap"
+                className="whitespace-nowrap" onClick={() => changeAnnotationType("instrumentation")}
               >
                 <span className="text-purple-500">Instrumentation (
                 {getAnnotationsByCategory("instrumentation").length})</span>
               </TabsTrigger>
-              <TabsTrigger value="anomaly" className="whitespace-nowrap">
+              <TabsTrigger value="anomaly" className="whitespace-nowrap" onClick={() => changeAnnotationType("anomaly")}>
                 <span className="text-orange-500">Anomaly ({getAnnotationsByCategory("anomaly").length})</span>
               </TabsTrigger>
             </TabsList>

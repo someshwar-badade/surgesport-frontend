@@ -31,7 +31,8 @@ export function RegisterForm({
     email: "",
     password: "",
     password_confirmation: "",
-    role_id: "1",
+    // Default to student role
+    role_id: "2",
   })
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -123,8 +124,9 @@ export function RegisterForm({
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">User</SelectItem>
-                    <SelectItem value="2">Admin</SelectItem>
+                    <SelectItem value="1">Admin</SelectItem>
+                    <SelectItem value="2">Student</SelectItem>
+                    <SelectItem value="3">Researcher</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>

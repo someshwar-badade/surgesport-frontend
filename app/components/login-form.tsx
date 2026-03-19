@@ -1,4 +1,5 @@
 import { cn } from "~/lib/utils"
+import { getDefaultRouteForRole } from "~/lib/roles"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
 import {
@@ -31,7 +32,8 @@ export function LoginForm({
     const res = await userLogin(form)
 
     if (res) {
-      navigate("/dashboard")
+      const roleId = (res as any)?.user?.role_id
+      navigate(getDefaultRouteForRole(roleId))
     }
   }
 

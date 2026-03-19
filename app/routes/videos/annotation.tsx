@@ -6,9 +6,11 @@ import { AnnotationDetails } from "~/components/videos/AnnotationDetails"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Card, CardContent } from "~/components/ui/card"
 import { NavLink } from "react-router"
+import { Badge } from "~/components/ui/badge"
 
 export default function Annotation() {
   const [capture, setCapture] = useState<any>(null)
+  const [selectedAnnotationType, setSelectedAnnotationType] = useState<string>("phases")
 
   // Mock video data - updated to match new Video interface
   const mockVideo = {
@@ -44,10 +46,18 @@ export default function Annotation() {
           {/* Video Player Column */}
           <div className="flex items-center justify-center">
             <div className="w-full">
-              <NavLink to="/videos/annotation/view" className="text-blue-500 hover:underline">
-                    Go to annotation timeline
-                  </NavLink>
-              <VideoPlayer onCapture={setCapture} />
+              <div className="mb-4 space-y-2">
+                <NavLink to="/videos/annotation/view" className="text-blue-500 hover:underline">
+                  Go to annotation timeline
+                </NavLink>
+                <p className="text-sm text-gray-500 mb-2">
+                  Double-click the video to capture annotation (time & position) and save it in the “Annotations” tab.
+                </p>
+              </div>
+              <VideoPlayer 
+                onCapture={setCapture} 
+                selectedAnnotationType={selectedAnnotationType}
+              />
             </div>
           </div>
           <Card className="h-full">
@@ -71,6 +81,7 @@ export default function Annotation() {
                     capture={capture}
                     onSaveAnnotation={handleSaveAnnotation}
                     onClearCapture={handleClearCapture}
+                    onAnnotationTypeChange={setSelectedAnnotationType}
                   />
                 </TabsContent>
               </Tabs>

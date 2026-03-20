@@ -25,9 +25,10 @@ type Props = {
   readonly onDurationChange?: (duration: number) => void
   readonly seekTime?: number
   readonly selectedAnnotationType?: string
+  readonly videoUrl?: string
 }
 
-export default function VideoPlayer({ onCapture, onDurationChange, seekTime, selectedAnnotationType = "phases" }: Props) {
+export default function VideoPlayer({ onCapture, onDurationChange, seekTime, selectedAnnotationType = "phases", videoUrl }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const playerRef = useRef<any>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -165,7 +166,7 @@ export default function VideoPlayer({ onCapture, onDurationChange, seekTime, sel
       >
         <ReactPlayer
           ref={playerRef}
-          src="/videos/video-2.mp4"
+          src={videoUrl || "/videos/video-2.mp4"}
           width="100%"
           height="100%"
           playing={playing}

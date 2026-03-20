@@ -59,6 +59,7 @@ export interface PhaseAnnotation {
 export interface EventAnnotation {
   id: number
   event_type: string
+  timestamp: number
   x_position: number
   y_position: number
   created_at?: string
@@ -90,12 +91,12 @@ export interface AnomalyAnnotation {
 
 export interface InstrumentationAnnotation {
   id: number
-  timestamp?: number
-  instrument: string
-  action: string
-  x_position?: number
-  y_position?: number
-  duration?: number
+  instrument_name: string
+  position: "LEFT" | "CENTER" | "RIGHT"
+  start_time: number
+  end_time?: number
+  x_position: number
+  y_position: number
   created_at?: string
   updated_at?: string
 }

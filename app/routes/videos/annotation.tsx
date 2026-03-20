@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { SiteHeader } from "~/components/site-header"
 import VideoPlayer from "~/components/video-player"
 import { VideoDetails } from "~/components/videos/VideoDetails"
@@ -7,25 +7,95 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Card, CardContent } from "~/components/ui/card"
 import { NavLink } from "react-router"
 import { Badge } from "~/components/ui/badge"
+import { getVideos, type Video } from "~/lib/videoService"
+import {
+  createPhaseAnnotation,
+  createEventAnnotation,
+  createBleedingAnnotation,
+  createInstrumentationAnnotation,
+  createAnomalyAnnotation,
+} from "~/lib/annotationService"
+import type { Annotation } from "~/types/annotation.type"
 
 export default function Annotation() {
+  const [videos, setVideos] = useState<Video[]>([])
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [capture, setCapture] = useState<any>(null)
   const [selectedAnnotationType, setSelectedAnnotationType] = useState<string>("phases")
 
-  // Mock video data - updated to match new Video interface
-  const mockVideo = {
-    id: "1",
-    procedure_type: "Endoscopy",
-    title: "Sample Endoscopy Video",
-    total_video_time: "00:05:05", // 5.5 minutes in seconds
-    video_url: "https://example.com/sample-video.mp4",
-    created_at: "2024-01-01T09:00:00Z",
-    updated_at: "2024-01-01T09:00:00Z",
-  }
+  useEffect(() => {
+    const loadVideos = async () => {
+      try {
+        const data = await getVideos()
+        setVideos(data)
+        if (!selectedVideo && data.length > 0) {
+          setSelectedVideo(data[0])
+        }
+      } catch (error) {
+        console.error("Failed to load videos", error)
+      }
+    }
 
-  const handleSaveAnnotation = (annotation: any) => {
-    console.log("Saving annotation:", annotation)
-    // Here you would typically save to a backend or state management
+    loadVideos()
+  }, [])
+
+  const handleSaveAnnotation = async (annotation: any) => {
+    if (!selectedVideo) {
+      console.warn("No video selected; cannot persist annotation")
+      return
+    }
+
+    try {
+      switch (annotation.category) {
+        case "phases":
+          await createPhaseAnnotation(selectedVideo.id, {
+            phase_name: annotation.phaseName,
+            start_time: annotation.time,
+            end_time: annotation.endTime,
+          })
+          break
+        case "events":
+          await createEventAnnotation(selectedVideo.id, {
+            event_type: annotation.eventName,
+            timestamp: annotation.time,
+            x_position: annotation.x,
+            y_position: annotation.y,
+          })
+          break
+        case "bleeds":
+          await createBleedingAnnotation(selectedVideo.id, {
+            onset_time: annotation.time,
+            severity: annotation.severity,
+            intervention_time: annotation.interventionTime,
+            x_position: annotation.x,
+            y_position: annotation.y,
+          })
+          break
+        case "instrumentation":
+          await createInstrumentationAnnotation(selectedVideo.id, {
+            instrument_name : annotation.instrumentName,
+            position: annotation.position,
+            start_time: annotation.time,
+            end_time: annotation.endTime,
+            x_position: annotation.x,
+            y_position: annotation.y,
+          })
+          break
+        case "anomaly":
+          await createAnomalyAnnotation(selectedVideo.id, {
+            timestamp: annotation.time,
+            description: annotation.description,
+            x_position: annotation.x,
+            y_position: annotation.y,
+          })
+          break
+        default:
+          console.warn("Unknown annotation category:", annotation.category)
+      }
+      console.log("Saved annotation to backend for video", selectedVideo.id)
+    } catch (error) {
+      console.error("Annotation save failed:", error)
+    }
   }
 
   const handleClearCapture = () => {
@@ -47,6 +117,30 @@ export default function Annotation() {
           <div className="flex items-center justify-center">
             <div className="w-full">
               <div className="mb-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <label htmlFor="videoSelect" className="text-sm font-medium">
+                    Select Video:
+                  </label>
+                  <select
+                    id="videoSelect"
+                    className="rounded border px-2 py-1 text-sm"
+                    value={selectedVideo?.id || ""}
+                    onChange={(e) => {
+                      const selected = videos.find((v) => v.id === e.target.value)
+                      setSelectedVideo(selected || null)
+                    }}
+                  >
+                    <option value="" disabled>
+                      -- Choose a video --
+                    </option>
+                    {videos.map((video) => (
+                      <option key={video.id} value={video.id}>
+                        {video.title ?? `Video ${video.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <NavLink to="/videos/annotation/view" className="text-blue-500 hover:underline">
                   Go to annotation timeline
                 </NavLink>
@@ -54,9 +148,10 @@ export default function Annotation() {
                   Double-click the video to capture annotation (time & position) and save it in the “Annotations” tab.
                 </p>
               </div>
-              <VideoPlayer 
-                onCapture={setCapture} 
+              <VideoPlayer
+                onCapture={setCapture}
                 selectedAnnotationType={selectedAnnotationType}
+                videoUrl={selectedVideo?.video_url}
               />
             </div>
           </div>
@@ -73,8 +168,7 @@ export default function Annotation() {
                   value="video_details"
                   className="space-y-4"
                 >
-                  {" "}
-                  <VideoDetails video={mockVideo} />
+                  <VideoDetails video={selectedVideo ?? undefined} />
                 </TabsContent>
                 <TabsContent key="annotations" value="annotations">
                   <AnnotationDetails

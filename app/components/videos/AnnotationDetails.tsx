@@ -86,6 +86,7 @@ export function AnnotationDetails({
     }
 
     let annotation: Annotation
+    let shouldPersist = false  // Only persist to API when truly "saving" a complete annotation
 
     if (category === "phases") {
       // Check if this phase is already active
@@ -95,10 +96,16 @@ export function AnnotationDetails({
         const endTime = capture.time
         const duration = endTime - startData.startTime
 
+        const completedAnnotation = {
+          ...startData.startAnnotation,
+          endTime,
+          duration,
+        }
+
         setAnnotations((prev) =>
           prev.map((ann) =>
             ann.id === startData.startAnnotation.id
-              ? { ...ann, endTime, duration }
+              ? completedAnnotation
               : ann
           )
         )
@@ -110,14 +117,16 @@ export function AnnotationDetails({
           return newActive
         })
 
+        // Persist completed phase to API
+        onSaveAnnotation?.(completedAnnotation)
         return
       }
 
-      // Start a new phase
+      // Start a new phase - just track it, don't persist yet
       annotation = {
         ...baseAnnotation,
         phaseName,
-          note: `${phaseName} phase started at ${formatSeconds(capture.time)}`,
+        note: `${phaseName} phase started at ${formatSeconds(capture.time)}`,
       }
 
       // Add to active phases
@@ -128,6 +137,10 @@ export function AnnotationDetails({
           startAnnotation: annotation,
         },
       }))
+
+      // Don't persist start, only end
+      setAnnotations((prev) => [...prev, annotation])
+      return
     } else {
       // Handle other categories normally
       switch (category) {
@@ -137,6 +150,7 @@ export function AnnotationDetails({
             eventName,
             note: `${eventName} event at ${formatSeconds(capture.time)}`,
           }
+          shouldPersist = true
           break
         case "bleeds":
           annotation = {
@@ -144,6 +158,7 @@ export function AnnotationDetails({
             severity,
             note: `${severity} bleed at ${formatSeconds(capture.time)}`,
           }
+          shouldPersist = true
           break
         case "instrumentation":
           // If this instrument is already active, end it and calculate duration
@@ -152,10 +167,16 @@ export function AnnotationDetails({
             const endTime = capture.time
             const duration = endTime - startData.startTime
 
+            const completedAnnotation = {
+              ...startData.startAnnotation,
+              endTime,
+              duration,
+            }
+
             setAnnotations((prev) =>
               prev.map((ann) =>
                 ann.id === startData.startAnnotation.id
-                  ? { ...ann, endTime, duration }
+                  ? completedAnnotation
                   : ann
               )
             )
@@ -166,10 +187,12 @@ export function AnnotationDetails({
               return newActive
             })
 
+            // Persist completed instrument to API
+            onSaveAnnotation?.(completedAnnotation)
             return
           }
 
-          // Start a new instrumentation entry
+          // Start a new instrumentation entry - just track it, don't persist yet
           annotation = {
             ...baseAnnotation,
             instrumentName,
@@ -184,24 +207,31 @@ export function AnnotationDetails({
               startAnnotation: annotation,
             },
           }))
-          break
+
+          // Don't persist start, only end
+          setAnnotations((prev) => [...prev, annotation])
+          return
         case "anomaly":
           annotation = {
             ...baseAnnotation,
             description,
             note: `Anomaly: ${description} at ${formatSeconds(capture.time)}`,
           }
+          shouldPersist = true
           break
         default:
           annotation = {
             ...baseAnnotation,
             note: `Annotation at ${formatSeconds(capture.time)}`,
           }
+          shouldPersist = true
       }
     }
 
     setAnnotations((prev) => [...prev, annotation])
-    onSaveAnnotation?.(annotation)
+    if (shouldPersist) {
+      onSaveAnnotation?.(annotation)
+    }
   }
 
   const handleClear = () => {

@@ -5,6 +5,7 @@ import type {
   EventAnnotation,
   BleedingAnnotation,
   InstrumentationAnnotation,
+  AnomalyAnnotation,
 } from "~/types/annotation.type"
 
 export interface ApiResponse<T> {
@@ -19,6 +20,7 @@ export interface AnnotationsByType {
   events: EventAnnotation[]
   bleeds: BleedingAnnotation[]
   instrumentation: InstrumentationAnnotation[]
+  anomaly: AnomalyAnnotation[]
 }
 
 const makeDummyPhaseAnnotations = (count = 12): PhaseAnnotation[] => {
@@ -106,7 +108,7 @@ const makeDummyInstrumentationAnnotations = (count = 12): InstrumentationAnnotat
 
 export async function getAnnotationsByVideoId(
   videoId: string,
-  types: string[] = ["phases", "events", "bleeds", "instrumentation"]
+  types: string[] = ["phases", "events", "bleeds", "instrumentation","anomaly"]
 ): Promise<AnnotationsByType> {
   const typesParam = types.join(",")
   try {
@@ -123,14 +125,16 @@ export async function getAnnotationsByVideoId(
       events: response.data.data.events ?? [],
       bleeds: response.data.data.bleeds ?? [],
       instrumentation: response.data.data.instrumentation ?? [],
+      anomaly: response.data.data.anomaly ?? [],
     }
   } catch (error) {
     // Fallback sample data for local dev when API is unavailable
     return {
-      phases: makeDummyPhaseAnnotations(12),
-      events: makeDummyEventAnnotations(12),
-      bleeds: makeDummyBleedingAnnotations(12),
-      instrumentation: makeDummyInstrumentationAnnotations(12),
+      phases: [],
+      events: [],
+      bleeds: [],
+      instrumentation: [],
+      anomaly: [],
     }
   }
 }

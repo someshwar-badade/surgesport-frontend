@@ -113,6 +113,20 @@ export default function Annotation() {
             createdAt: i.created_at || new Date().toISOString(),
             updatedAt: i.updated_at || new Date().toISOString(),
           })),
+          ...data.anomaly.map(a => ({
+            id: `anomaly-${a.id}`,
+            video_id: selectedVideo.id,
+            timestamp: a.created_at || new Date().toISOString(),
+            time: a.timestamp,
+            x: a.x_position || 0,
+            y: a.y_position || 0,
+            xPercent: (a.x_position || 0) / 1920 * 100,
+            yPercent: (a.y_position || 0) / 1080 * 100,
+            category: 'anomaly' as const,
+            description: a.description,
+            createdAt: a.created_at || new Date().toISOString(),
+            updatedAt: a.updated_at || new Date().toISOString(),
+          })),
         ]
         setAnnotations(allAnnotations)
       } catch (error) {
@@ -193,23 +207,25 @@ export default function Annotation() {
     if (!selectedVideo) return
 
     try {
+      console.log("Attempting to delete annotation", annotationId)
       // Extract category and numeric ID from annotation ID (e.g., "phase-123" -> "phases", 123)
       const parts = annotationId.split('-')
       const category = parts[0]
       const numericId = parseInt(parts[1])
-      
+      console.log("Parsed category:", category, "numericId:", numericId)
       if (isNaN(numericId)) return
 
       // Map singular category names to plural API endpoints
       const categoryMap: Record<string, string> = {
         'phase': 'phases',
         'event': 'events',
-        'bleed': 'bleeds',
-        'instrument': 'instrumentation',
+        'bleed':'bleedings',
+        'instrument': 'instruments',
+        'anomaly': 'anomalies',
       }
       
       const apiCategory = categoryMap[category] || category
-
+     console.log(apiCategory,category,categoryMap)
       await deleteAnnotation(selectedVideo.id, numericId, apiCategory)
       
       // Remove from local state

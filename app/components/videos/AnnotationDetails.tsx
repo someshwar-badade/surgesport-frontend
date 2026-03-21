@@ -32,6 +32,7 @@ interface AnnotationDetailsProps {
   readonly isViewMode?: boolean
   readonly videoId?: string
   readonly onAnnotationTypeChange?: (type: string) => void
+  readonly onDeleteAnnotation?: (annotationId: string) => Promise<void>
 }
 
 export function AnnotationDetails({
@@ -42,6 +43,7 @@ export function AnnotationDetails({
   isViewMode = false,
   videoId = "1",
   onAnnotationTypeChange,
+  onDeleteAnnotation,
 }: AnnotationDetailsProps) {
   const [annotations, setAnnotations] = React.useState<Annotation[]>(
     propAnnotations || []
@@ -64,6 +66,7 @@ export function AnnotationDetails({
   const [activeInstruments, setActiveInstruments] = React.useState<{
     [key: string]: { startTime: number; startAnnotation: Annotation }
   }>({})
+  const [deletingId, setDeletingId] = React.useState<string | null>(null)
 
   const changeAnnotationType = (category: Annotation["category"]) => {
     if (onAnnotationTypeChange) {
@@ -236,6 +239,15 @@ export function AnnotationDetails({
 
   const handleClear = () => {
     onClearCapture?.()
+  }
+
+  const handleDeleteClick = async (annotationId: string) => {
+    setDeletingId(annotationId)
+    try {
+      await onDeleteAnnotation?.(annotationId)
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   const getAnnotationsByCategory = (category: Annotation["category"]) => {
@@ -645,6 +657,7 @@ export function AnnotationDetails({
                             <TableHead>Description</TableHead>
                           )}
                           <TableHead>Created</TableHead>
+                          <TableHead className="w-16">Action</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -724,6 +737,16 @@ export function AnnotationDetails({
                                 {new Date(
                                   annotation.timestamp
                                 ).toLocaleTimeString()}
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleDeleteClick(annotation.id)}
+                                  disabled={deletingId === annotation.id}
+                                >
+                                  {deletingId === annotation.id ? "Deleting..." : "Delete"}
+                                </Button>
                               </TableCell>
                             </TableRow>
                           )

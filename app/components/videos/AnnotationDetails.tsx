@@ -48,6 +48,11 @@ export function AnnotationDetails({
   const [annotations, setAnnotations] = React.useState<Annotation[]>(
     propAnnotations || []
   )
+
+  // Sync with prop changes
+  React.useEffect(() => {
+    setAnnotations(propAnnotations || [])
+  }, [propAnnotations])
   // Form state for additional fields
   const [phaseName, setPhaseName] = React.useState("")
   const [eventName, setEventName] = React.useState("")

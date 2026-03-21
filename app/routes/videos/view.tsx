@@ -7,8 +7,8 @@ import { Card, CardContent } from "~/components/ui/card"
 import { AnnotationTimeline } from "~/components/videos/AnnotationTimeline"
 import { useState, useEffect } from "react"
 import { getAnnotationsByVideoId } from "~/lib/annotationService"
-import { initializeSampleAnnotations } from "~/lib/sampleData"
-import type { PhaseAnnotation, EventAnnotation, Annotation } from "~/types/annotation.type"
+import { getVideos, type Video } from "~/lib/videoService"
+import type { PhaseAnnotation, EventAnnotation, BleedingAnnotation, InstrumentationAnnotation, Annotation } from "~/types/annotation.type"
 
 // Mock video data for 10 min duration - updated to match new Video interface
 const mockVideo = {
@@ -24,19 +24,22 @@ const mockVideo = {
 // Mock video ID - in a real app this would come from route params
 const videoId = "1"
 
-// Convert new annotation types to old Annotation format for compatibility
+// Convert all annotation types to Annotation format for compatibility
 const convertToLegacyAnnotations = (
   phases: PhaseAnnotation[],
-  events: EventAnnotation[]
+  events: EventAnnotation[],
+  bleeds: BleedingAnnotation[],
+  instrumentation: InstrumentationAnnotation[],
+  videoId: string
 ): Annotation[] => {
   const legacyAnnotations: Annotation[] = []
 
   // Convert phases
   phases.forEach(phase => {
     legacyAnnotations.push({
-      id: phase.id.toString(),
+      id: `phase-${phase.id}`,
       video_id: videoId,
-      timestamp: new Date().toISOString(),
+      timestamp: phase.created_at || new Date().toISOString(),
       time: phase.start_time,
       x: 0,
       y: 0,
@@ -54,14 +57,14 @@ const convertToLegacyAnnotations = (
   // Convert events
   events.forEach(event => {
     legacyAnnotations.push({
-      id: event.id.toString(),
+      id: `event-${event.id}`,
       video_id: videoId,
-      timestamp: new Date().toISOString(),
-      time: 0, // Events don't have time in the new API
+      timestamp: event.created_at || new Date().toISOString(),
+      time: event.timestamp,
       x: event.x_position,
       y: event.y_position,
-      xPercent: 0,
-      yPercent: 0,
+      xPercent: (event.x_position / 1920) * 100,
+      yPercent: (event.y_position / 1080) * 100,
       category: "events",
       eventName: event.event_type,
       createdAt: event.created_at || new Date().toISOString(),
@@ -69,92 +72,115 @@ const convertToLegacyAnnotations = (
     })
   })
 
+  // Convert bleeds
+  bleeds.forEach(bleed => {
+    legacyAnnotations.push({
+      id: `bleed-${bleed.id}`,
+      video_id: videoId,
+      timestamp: bleed.created_at || new Date().toISOString(),
+      time: bleed.onset_time,
+      x: bleed.x_position,
+      y: bleed.y_position,
+      xPercent: (bleed.x_position / 1920) * 100,
+      yPercent: (bleed.y_position / 1080) * 100,
+      category: "bleeds",
+      severity: bleed.severity as 'mild' | 'moderate' | 'severe',
+      interventionTime: bleed.intervention_time,
+      createdAt: bleed.created_at || new Date().toISOString(),
+      updatedAt: bleed.updated_at || new Date().toISOString(),
+    })
+  })
+
+  // Convert instrumentation
+  instrumentation.forEach(inst => {
+    legacyAnnotations.push({
+      id: `instrument-${inst.id}`,
+      video_id: videoId,
+      timestamp: inst.created_at || new Date().toISOString(),
+      time: inst.start_time,
+      x: inst.x_position || 0,
+      y: inst.y_position || 0,
+      xPercent: (inst.x_position || 0) / 1920 * 100,
+      yPercent: (inst.y_position || 0) / 1080 * 100,
+      category: "instrumentation",
+      instrumentName: inst.instrument_name,
+      position: inst.position as 'Left' | 'Center' | 'Right',
+      endTime: inst.end_time,
+      createdAt: inst.created_at || new Date().toISOString(),
+      updatedAt: inst.updated_at || new Date().toISOString(),
+    })
+  })
+
   return legacyAnnotations
 }
 
 export default function ViewAnnotation() {
+  const [videos, setVideos] = useState<Video[]>([])
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [videoDuration, setVideoDuration] = useState(600) // Default to 10 minutes
   const [seekTime, setSeekTime] = useState<number | undefined>(undefined)
   const [annotations, setAnnotations] = useState<{
     phases: PhaseAnnotation[]
     events: EventAnnotation[]
+    bleeds: BleedingAnnotation[]
+    instrumentation: InstrumentationAnnotation[]
   }>({
     phases: [],
-    events: []
+    events: [],
+    bleeds: [],
+    instrumentation: [],
   })
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
-  // Convert new annotation types to old Annotation format for compatibility
-  const convertToLegacyAnnotations = (
-    phases: PhaseAnnotation[],
-    events: EventAnnotation[]
-  ): Annotation[] => {
-    const legacyAnnotations: Annotation[] = []
+  // Load videos on mount
+  useEffect(() => {
+    const loadVideos = async () => {
+      try {
+        const data = await getVideos()
+        setVideos(data)
+        if (!selectedVideo && data.length > 0) {
+          setSelectedVideo(data[0])
+        }
+      } catch (error) {
+        console.error("Failed to load videos", error)
+      }
+    }
 
-    // Convert phases
-    phases.forEach(phase => {
-      legacyAnnotations.push({
-        id: phase.id.toString(),
-        video_id: videoId,
-        timestamp: new Date().toISOString(),
-        time: phase.start_time,
-        x: 0,
-        y: 0,
-        xPercent: 0,
-        yPercent: 0,
-        category: "phases",
-        phaseName: phase.phase_name,
-        endTime: phase.end_time,
-        duration: phase.end_time ? phase.end_time - phase.start_time : undefined,
-        createdAt: phase.created_at || new Date().toISOString(),
-        updatedAt: phase.updated_at || new Date().toISOString(),
-      })
-    })
+    loadVideos()
+  }, [])
 
-    // Convert events
-    events.forEach(event => {
-      legacyAnnotations.push({
-        id: event.id.toString(),
-        video_id: videoId,
-        timestamp: new Date().toISOString(),
-        time: 0, // Events don't have time in the new API
-        x: event.x_position,
-        y: event.y_position,
-        xPercent: 0,
-        yPercent: 0,
-        category: "events",
-        eventName: event.event_type,
-        createdAt: event.created_at || new Date().toISOString(),
-        updatedAt: event.updated_at || new Date().toISOString(),
-      })
-    })
-
-    return legacyAnnotations
-  }
-
-  const legacyAnnotations = convertToLegacyAnnotations(annotations.phases, annotations.events)
-
+  // Load annotations when video changes
   useEffect(() => {
     const loadAnnotations = async () => {
+      if (!selectedVideo) return
+
+      setLoading(true)
       try {
-        let data = await getAnnotationsByVideoId(videoId)
-
-        // Initialize sample data if no annotations exist
-        if (data.phases.length === 0 && data.events.length === 0) {
-          await initializeSampleAnnotations()
-          data = await getAnnotationsByVideoId(videoId)
-        }
-
+        const data = await getAnnotationsByVideoId(selectedVideo.id)
         setAnnotations(data)
       } catch (error) {
         console.error("Failed to load annotations:", error)
+        setAnnotations({
+          phases: [],
+          events: [],
+          bleeds: [],
+          instrumentation: [],
+        })
       } finally {
         setLoading(false)
       }
     }
 
     loadAnnotations()
-  }, [videoId])
+  }, [selectedVideo])
+
+  const legacyAnnotations = convertToLegacyAnnotations(
+    annotations.phases,
+    annotations.events,
+    annotations.bleeds,
+    annotations.instrumentation,
+    selectedVideo?.id || "1"
+  )
 
   const handleDurationChange = (duration: number) => {
     setVideoDuration(duration)
@@ -177,9 +203,38 @@ export default function ViewAnnotation() {
         <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-[65%_35%]">
           {/* Video Player Column */}
           <div className="space-y-4">
+            <div className="mb-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <label htmlFor="videoSelect" className="text-sm font-medium">
+                  Select Video:
+                </label>
+                <select
+                  id="videoSelect"
+                  className="rounded border px-2 py-1 text-sm"
+                  value={selectedVideo?.id || ""}
+                  onChange={(e) => {
+                    const selected = videos.find((v) => v.id === e.target.value)
+                    setSelectedVideo(selected || null)
+                  }}
+                >
+                  <option value="" disabled>
+                    -- Choose a video --
+                  </option>
+                  {videos.map((video) => (
+                    <option key={video.id} value={video.id}>
+                      {video.title ?? `Video ${video.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <div className="flex items-center justify-center">
               <div className="w-full">
-                <VideoPlayer onDurationChange={handleDurationChange} seekTime={seekTime} />
+                <VideoPlayer 
+                  onDurationChange={handleDurationChange} 
+                  seekTime={seekTime}
+                  videoUrl={selectedVideo?.video_url}
+                />
               </div>
             </div>
             {/* Timeline below video */}
@@ -203,13 +258,13 @@ export default function ViewAnnotation() {
                   value="video_details"
                   className="space-y-4"
                 >
-                  {/* <VideoDetails video={mockVideo} /> */}
+                  <VideoDetails video={selectedVideo ?? undefined} />
                 </TabsContent>
                 <TabsContent key="annotations" value="annotations">
                   <AnnotationDetails
                     annotations={legacyAnnotations}
                     isViewMode={true}
-                    videoId={videoId}
+                    videoId={selectedVideo?.id || "1"}
                   />
                 </TabsContent>
               </Tabs>

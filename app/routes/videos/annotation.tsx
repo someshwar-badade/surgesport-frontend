@@ -14,6 +14,8 @@ import {
   createBleedingAnnotation,
   createInstrumentationAnnotation,
   createAnomalyAnnotation,
+  getAnnotationsByVideoId,
+  deleteAnnotation,
 } from "~/lib/annotationService"
 import type { Annotation } from "~/types/annotation.type"
 
@@ -22,6 +24,8 @@ export default function Annotation() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [capture, setCapture] = useState<any>(null)
   const [selectedAnnotationType, setSelectedAnnotationType] = useState<string>("phases")
+  const [annotations, setAnnotations] = useState<Annotation[]>([])
+  const [loadingAnnotations, setLoadingAnnotations] = useState(false)
 
   useEffect(() => {
     const loadVideos = async () => {
@@ -38,6 +42,89 @@ export default function Annotation() {
 
     loadVideos()
   }, [])
+
+  // Fetch annotations when video changes
+  useEffect(() => {
+    const loadAnnotations = async () => {
+      if (!selectedVideo) return
+      
+      setLoadingAnnotations(true)
+      try {
+        const data = await getAnnotationsByVideoId(selectedVideo.id)
+        // Flatten all annotations by category into single array
+        const allAnnotations: Annotation[] = [
+          ...data.phases.map(p => ({
+            id: `phase-${p.id}`,
+            video_id: selectedVideo.id,
+            timestamp: p.created_at || new Date().toISOString(),
+            time: p.start_time,
+            x: 0,
+            y: 0,
+            xPercent: 0,
+            yPercent: 0,
+            category: 'phases' as const,
+            phaseName: p.phase_name,
+            endTime: p.end_time,
+            createdAt: p.created_at || new Date().toISOString(),
+            updatedAt: p.updated_at || new Date().toISOString(),
+          })),
+          ...data.events.map(e => ({
+            id: `event-${e.id}`,
+            video_id: selectedVideo.id,
+            timestamp: e.created_at || new Date().toISOString(),
+            time: e.timestamp,
+            x: e.x_position,
+            y: e.y_position,
+            xPercent: (e.x_position / 1920) * 100,
+            yPercent: (e.y_position / 1080) * 100,
+            category: 'events' as const,
+            eventName: e.event_type,
+            createdAt: e.created_at || new Date().toISOString(),
+            updatedAt: e.updated_at || new Date().toISOString(),
+          })),
+          ...data.bleeds.map(b => ({
+            id: `bleed-${b.id}`,
+            video_id: selectedVideo.id,
+            timestamp: b.created_at || new Date().toISOString(),
+            time: b.onset_time,
+            x: b.x_position,
+            y: b.y_position,
+            xPercent: (b.x_position / 1920) * 100,
+            yPercent: (b.y_position / 1080) * 100,
+            category: 'bleeds' as const,
+            severity: b.severity as 'mild' | 'moderate' | 'severe',
+            interventionTime: b.intervention_time,
+            createdAt: b.created_at || new Date().toISOString(),
+            updatedAt: b.updated_at || new Date().toISOString(),
+          })),
+          ...data.instrumentation.map(i => ({
+            id: `instrument-${i.id}`,
+            video_id: selectedVideo.id,
+            timestamp: i.created_at || new Date().toISOString(),
+            time: i.start_time,
+            x: i.x_position || 0,
+            y: i.y_position || 0,
+            xPercent: (i.x_position || 0) / 1920 * 100,
+            yPercent: (i.y_position || 0) / 1080 * 100,
+            category: 'instrumentation' as const,
+            instrumentName: i.instrument_name,
+            position: i.position as 'Left' | 'Center' | 'Right',
+            endTime: i.end_time,
+            createdAt: i.created_at || new Date().toISOString(),
+            updatedAt: i.updated_at || new Date().toISOString(),
+          })),
+        ]
+        setAnnotations(allAnnotations)
+      } catch (error) {
+        console.error("Failed to load annotations", error)
+        setAnnotations([])
+      } finally {
+        setLoadingAnnotations(false)
+      }
+    }
+
+    loadAnnotations()
+  }, [selectedVideo])
 
   const handleSaveAnnotation = async (annotation: any) => {
     if (!selectedVideo) {
@@ -100,6 +187,37 @@ export default function Annotation() {
 
   const handleClearCapture = () => {
     setCapture(null)
+  }
+
+  const handleDeleteAnnotation = async (annotationId: string) => {
+    if (!selectedVideo) return
+
+    try {
+      // Extract category and numeric ID from annotation ID (e.g., "phase-123" -> "phases", 123)
+      const parts = annotationId.split('-')
+      const category = parts[0]
+      const numericId = parseInt(parts[1])
+      
+      if (isNaN(numericId)) return
+
+      // Map singular category names to plural API endpoints
+      const categoryMap: Record<string, string> = {
+        'phase': 'phases',
+        'event': 'events',
+        'bleed': 'bleeds',
+        'instrument': 'instrumentation',
+      }
+      
+      const apiCategory = categoryMap[category] || category
+
+      await deleteAnnotation(selectedVideo.id, numericId, apiCategory)
+      
+      // Remove from local state
+      setAnnotations(prev => prev.filter(ann => ann.id !== annotationId))
+      console.log("Annotation deleted successfully")
+    } catch (error) {
+      console.error("Failed to delete annotation", error)
+    }
   }
 
   return (
@@ -176,6 +294,9 @@ export default function Annotation() {
                     onSaveAnnotation={handleSaveAnnotation}
                     onClearCapture={handleClearCapture}
                     onAnnotationTypeChange={setSelectedAnnotationType}
+                    annotations={annotations}
+                    videoId={selectedVideo?.id}
+                    onDeleteAnnotation={handleDeleteAnnotation}
                   />
                 </TabsContent>
               </Tabs>

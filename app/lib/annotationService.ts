@@ -229,9 +229,13 @@ export async function updateAnnotation(
   return response.data.data
 }
 
-export async function deleteAnnotation(videoId: string, annotationId: number): Promise<void> {
+export async function deleteAnnotation(
+  videoId: string,
+  annotationId: number,
+  category: string
+): Promise<void> {
   const response = await apiClient.delete<ApiResponse<null>>(
-    `/videos/${videoId}/annotations/${annotationId}`
+    `/videos/${videoId}/${category}/${annotationId}`
   )
   if (!response.data.status) {
     throw new Error(response.data.message || "Failed to delete annotation")

@@ -8,7 +8,7 @@ import { AnnotationTimeline } from "~/components/videos/AnnotationTimeline"
 import { useState, useEffect } from "react"
 import { getAnnotationsByVideoId } from "~/lib/annotationService"
 import { getVideos, type Video } from "~/lib/videoService"
-import type { PhaseAnnotation, EventAnnotation, BleedingAnnotation, InstrumentationAnnotation, Annotation } from "~/types/annotation.type"
+import type { PhaseAnnotation, EventAnnotation, BleedingAnnotation, InstrumentationAnnotation, Annotation,AnomalyAnnotation } from "~/types/annotation.type"
 
 // Mock video data for 10 min duration - updated to match new Video interface
 const mockVideo = {
@@ -30,6 +30,7 @@ const convertToLegacyAnnotations = (
   events: EventAnnotation[],
   bleeds: BleedingAnnotation[],
   instrumentation: InstrumentationAnnotation[],
+  anomaly: AnomalyAnnotation[],
   videoId: string
 ): Annotation[] => {
   const legacyAnnotations: Annotation[] = []
@@ -111,6 +112,24 @@ const convertToLegacyAnnotations = (
     })
   })
 
+  // Convert anomalies
+  anomaly.forEach(anom => {
+    legacyAnnotations.push({
+      id: `anomaly-${anom.id}`,
+      video_id: videoId,
+      timestamp: anom.created_at || new Date().toISOString(),
+      time: anom.timestamp,
+      x: anom.x_position || 0,
+      y: anom.y_position || 0,
+      xPercent: (anom.x_position || 0) / 1920 * 100,
+      yPercent: (anom.y_position || 0) / 1080 * 100,
+      category: "anomaly",
+      description: anom.description,
+      createdAt: anom.created_at || new Date().toISOString(),
+      updatedAt: anom.updated_at || new Date().toISOString(),
+    })
+  })
+
   return legacyAnnotations
 }
 
@@ -124,11 +143,13 @@ export default function ViewAnnotation() {
     events: EventAnnotation[]
     bleeds: BleedingAnnotation[]
     instrumentation: InstrumentationAnnotation[]
+    anomaly: AnomalyAnnotation[]
   }>({
     phases: [],
     events: [],
     bleeds: [],
     instrumentation: [],
+    anomaly: [],
   })
   const [loading, setLoading] = useState(false)
 
@@ -165,6 +186,7 @@ export default function ViewAnnotation() {
           events: [],
           bleeds: [],
           instrumentation: [],
+          anomaly: [],
         })
       } finally {
         setLoading(false)
@@ -179,6 +201,7 @@ export default function ViewAnnotation() {
     annotations.events,
     annotations.bleeds,
     annotations.instrumentation,
+      annotations.anomaly,
     selectedVideo?.id || "1"
   )
 

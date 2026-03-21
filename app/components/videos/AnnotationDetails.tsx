@@ -33,6 +33,7 @@ interface AnnotationDetailsProps {
   readonly videoId?: string
   readonly onAnnotationTypeChange?: (type: string) => void
   readonly onDeleteAnnotation?: (annotationId: string) => Promise<void>
+  readonly onAnnotationClick?: (time: number) => void
 }
 
 export function AnnotationDetails({
@@ -44,10 +45,16 @@ export function AnnotationDetails({
   videoId = "1",
   onAnnotationTypeChange,
   onDeleteAnnotation,
+  onAnnotationClick,
 }: AnnotationDetailsProps) {
   const [annotations, setAnnotations] = React.useState<Annotation[]>(
     propAnnotations || []
   )
+
+  // Sync with prop changes
+  React.useEffect(() => {
+    setAnnotations(propAnnotations || [])
+  }, [propAnnotations])
   // Form state for additional fields
   const [phaseName, setPhaseName] = React.useState("")
   const [eventName, setEventName] = React.useState("")
@@ -663,11 +670,12 @@ export function AnnotationDetails({
                       <TableBody>
                         {getAnnotationsByCategory(category).map(
                           (annotation, index) => (
-                            <TableRow key={annotation.id}>
+                            <TableRow key={annotation.id} onClick={() => onAnnotationClick?.(annotation.time)} className="cursor-pointer hover:bg-muted/50">
                               <TableCell>
                                 <Badge
                                   variant="secondary"
                                   className={getCategoryColor(category)}
+                                  
                                 >
                                   {index + 1}
                                 </Badge>

@@ -138,6 +138,7 @@ export default function ViewAnnotation() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [videoDuration, setVideoDuration] = useState(600) // Default to 10 minutes
   const [seekTime, setSeekTime] = useState<number | undefined>(undefined)
+  const [currentTime, setCurrentTime] = useState(0)
   const [annotations, setAnnotations] = useState<{
     phases: PhaseAnnotation[]
     events: EventAnnotation[]
@@ -257,13 +258,15 @@ export default function ViewAnnotation() {
                   onDurationChange={handleDurationChange} 
                   seekTime={seekTime}
                   videoUrl={selectedVideo?.video_url}
+                  onTimeUpdate={(time) => setCurrentTime(time)} 
                 />
               </div>
             </div>
             {/* Timeline below video */}
             <AnnotationTimeline
               annotations={legacyAnnotations}
-              videoDuration={videoDuration}
+              videoDuration={videoDuration} 
+              currentTime={currentTime}
               onAnnotationClick={handleAnnotationClick}
             />
           </div>
@@ -288,6 +291,7 @@ export default function ViewAnnotation() {
                     annotations={legacyAnnotations}
                     isViewMode={true}
                     videoId={selectedVideo?.id || "1"}
+                    onAnnotationClick={handleAnnotationClick}
                   />
                 </TabsContent>
               </Tabs>

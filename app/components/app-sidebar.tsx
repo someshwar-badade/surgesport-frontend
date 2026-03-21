@@ -50,6 +50,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     if (isResearcher(roleId)) {
       return [
         {
+          title: "Dashboard",
+          url: "/dashboard",
+          icon: IconDashboard,
+        },
+        {
           title: "Videos",
           url: "/videos",
           icon: IconFolder,
@@ -64,6 +69,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     if (isStudent(roleId)) {
       return [
+        {
+          title: "Dashboard",
+          url: "/dashboard",
+          icon: IconDashboard,
+        },
         {
           title: "Annotations",
           url: "/videos/annotation",

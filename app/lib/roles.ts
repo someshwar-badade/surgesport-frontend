@@ -36,13 +36,15 @@ export const isPathAllowedForRole = (role: number | string | null, path: string)
 
   if (isStudent(role)) {
     // Students only have access to the annotations pages.
-    const allowedPaths = ["/videos/annotation", "/videos/annotation/view"]
+    const allowedPaths = ["/dashboard","/videos/annotation", "/videos/annotation/view"]
     return allowedPaths.some((p) => normalizedPath === p || normalizedPath.startsWith(`${p}/`))
   }
 
   if (isResearcher(role)) {
     // Researchers can manage videos and annotations.
-    return normalizedPath.startsWith("/videos")
+    //allow to dashboard, videos, and annotation pages
+     const allowedPaths = ["/dashboard", "/videos", "/videos/annotation"]
+    return allowedPaths.some((p) => normalizedPath === p || normalizedPath.startsWith(`${p}/`))
   }
 
   return false

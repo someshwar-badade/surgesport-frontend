@@ -15,6 +15,7 @@ import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import type { Annotation } from "~/types/annotation.type"
 import { formatSeconds } from "~/lib/utils"
+import { AnnotationTable } from "./AnnotationTable"
 
 type CaptureData = {
   time: number
@@ -629,138 +630,11 @@ export function AnnotationDetails({
                     Saved {getCategoryLabel(category)} Annotations
                   </h3>
                   <div className="max-h-64 overflow-y-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-12">#</TableHead>
-                          {category !== "phases" && <TableHead>Time</TableHead>}
-                          {category === "phases" && (
-                            <>
-                              <TableHead>Phase</TableHead>
-                              <TableHead>Start</TableHead>
-                              <TableHead>End</TableHead>
-                              <TableHead>Duration</TableHead>
-                            </>
-                          )}
-                          {category === "events" && (
-                            <TableHead>Event</TableHead>
-                          )}
-                          {category === "bleeds" && (
-                            <>
-                              <TableHead>Severity</TableHead>
-                              <TableHead>Location</TableHead>
-                            </>
-                          )}
-                          {category === "instrumentation" && (
-                            <>
-                              <TableHead>Instrument</TableHead>
-                              <TableHead>Position</TableHead>
-                              <TableHead>Start</TableHead>
-                              <TableHead>End</TableHead>
-                              <TableHead>Duration</TableHead>
-                            </>
-                          )}
-                          {category === "anomaly" && (
-                            <TableHead>Description</TableHead>
-                          )}
-                          <TableHead>Created</TableHead>
-                          <TableHead className="w-16">Action</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {getAnnotationsByCategory(category).map(
-                          (annotation, index) => (
-                            <TableRow key={annotation.id} onClick={() => onAnnotationClick?.(annotation.time)} className="cursor-pointer hover:bg-muted/50">
-                              <TableCell>
-                                <Badge
-                                  variant="secondary"
-                                  className={getCategoryColor(category)}
-                                  
-                                >
-                                  {index + 1}
-                                </Badge>
-                              </TableCell>
-                              {category !== "phases" && (
-                                <TableCell className="font-mono text-xs">
-                                  {formatSeconds(annotation.time)}
-                                </TableCell>
-                              )}
-                              {category === "phases" && (
-                                <>
-                                  <TableCell className="text-xs">
-                                    {annotation.phaseName}
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs">
-                                    {formatSeconds(annotation.time)}
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs">
-                                    {annotation.endTime ? formatSeconds(annotation.endTime) : "-"}
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs">
-                                    {annotation.duration ? formatSeconds(annotation.duration) : "-"}
-                                  </TableCell>
-                                </>
-                              )}
-                              {category === "events" && (
-                                <TableCell className="text-xs">
-                                  {annotation.eventName}
-                                </TableCell>
-                              )}
-                              {category === "bleeds" && (
-                                <>
-                                  <TableCell className="text-xs capitalize">
-                                    {annotation.severity}
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs">
-                                    ({annotation.xPercent.toFixed(1)}%,{" "}
-                                    {annotation.yPercent.toFixed(1)}%)
-                                  </TableCell>
-                                </>
-                              )}
-                              {category === "instrumentation" && (
-                                <>
-                                  <TableCell className="text-xs">
-                                    {annotation.instrumentName}
-                                  </TableCell>
-                                  <TableCell className="text-xs">
-                                    {annotation.position}
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs">
-                                    {formatSeconds(annotation.time)}
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs">
-                                    {annotation.endTime ? formatSeconds(annotation.endTime) : "-"}
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs">
-                                    {annotation.duration ? formatSeconds(annotation.duration) : "-"}
-                                  </TableCell>
-                                </>
-                              )}
-                              {category === "anomaly" && (
-                                <TableCell className="max-w-32 truncate text-xs">
-                                  {annotation.description}
-                                </TableCell>
-                              )}
-                              <TableCell className="text-xs text-muted-foreground">
-                                {new Date(
-                                  annotation.timestamp
-                                ).toLocaleTimeString()}
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => handleDeleteClick(annotation.id)}
-                                  disabled={deletingId === annotation.id}
-                                >
-                                  {deletingId === annotation.id ? "Deleting..." : "Delete"}
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          )
-                        )}
-                      </TableBody>
-                    </Table>
+                    <AnnotationTable
+                    category={category}
+                    annotations={getAnnotationsByCategory(category)}
+                    onAnnotationClick={onAnnotationClick}
+                  />
                   </div>
                 </div>
               )}

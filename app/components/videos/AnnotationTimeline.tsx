@@ -6,6 +6,7 @@ import { formatSeconds } from "~/lib/utils"
 interface AnnotationTimelineProps {
   annotations: Annotation[]
   videoDuration: number // in seconds
+  currentTime: number
   onAnnotationClick?: (time: number) => void
 }
 
@@ -20,6 +21,7 @@ const categoryColors = {
 export function AnnotationTimeline({
   annotations,
   videoDuration,
+  currentTime,
   onAnnotationClick,
 }: AnnotationTimelineProps) {
   return (
@@ -30,8 +32,14 @@ export function AnnotationTimeline({
       <CardContent>
         <div className="relative h-8 w-full rounded bg-gray-200">
           {/* Timeline base */}
-          <div className="absolute inset-0 rounded bg-gray-300"></div>
-
+         
+            <div
+              className="absolute top-0 h-full w-[2px] bg-black z-50 pointer-events-none shadow-[0_0_6px_rgba(0,0,0,0.6)]"
+              style={{
+                left: `${(currentTime / videoDuration) * 100}%`,
+                transition: "left 0.1s linear",
+              }}
+            />
           {/* Annotations */}
           {annotations.map((annotation) => {
             const leftPercent = (annotation.time / videoDuration) * 100

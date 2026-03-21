@@ -26,9 +26,10 @@ type Props = {
   readonly seekTime?: number
   readonly selectedAnnotationType?: string
   readonly videoUrl?: string
+  onTimeUpdate?: (currentTime: number) => void
 }
 
-export default function VideoPlayer({ onCapture, onDurationChange, seekTime, selectedAnnotationType = "phases", videoUrl }: Props) {
+export default function VideoPlayer({ onCapture, onDurationChange, seekTime, selectedAnnotationType = "phases", videoUrl, onTimeUpdate }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const playerRef = useRef<any>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -185,7 +186,9 @@ export default function VideoPlayer({ onCapture, onDurationChange, seekTime, sel
             onDurationChange?.(video.duration)
 
             const updateTime = () => {
-              setCurrentTime(video.currentTime)
+              const time = video.currentTime
+              setCurrentTime(time)
+              onTimeUpdate?.(time) //
             }
 
             video.addEventListener("timeupdate", updateTime)

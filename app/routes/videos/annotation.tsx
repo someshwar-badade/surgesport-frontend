@@ -26,6 +26,7 @@ export default function Annotation() {
   const [selectedAnnotationType, setSelectedAnnotationType] = useState<string>("phases")
   const [annotations, setAnnotations] = useState<Annotation[]>([])
   const [loadingAnnotations, setLoadingAnnotations] = useState(false)
+  const [seekTime, setSeekTime] = useState<number | undefined>(undefined)
 
   useEffect(() => {
     const loadVideos = async () => {
@@ -242,6 +243,11 @@ export default function Annotation() {
     }
   }
 
+  const handleAnnotationClick = (time: number) => {
+    console.log("Seeking video to time:", time)
+    setSeekTime(time)
+  }
+
   return (
     <>
       <SiteHeader
@@ -290,6 +296,7 @@ export default function Annotation() {
               </div>
               <VideoPlayer
                 onCapture={setCapture}
+                seekTime={seekTime}
                 selectedAnnotationType={selectedAnnotationType}
                 videoUrl={selectedVideo?.video_url}
               />
@@ -319,6 +326,7 @@ export default function Annotation() {
                     annotations={annotations}
                     videoId={selectedVideo?.id}
                     onDeleteAnnotation={handleDeleteAnnotation}
+                    onAnnotationClick={handleAnnotationClick}
                   />
                 </TabsContent>
               </Tabs>

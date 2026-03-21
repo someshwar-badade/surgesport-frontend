@@ -288,6 +288,7 @@ export default function ViewAnnotation() {
                     annotations={legacyAnnotations}
                     isViewMode={true}
                     videoId={selectedVideo?.id || "1"}
+                    onAnnotationClick={handleAnnotationClick}
                   />
                 </TabsContent>
               </Tabs>

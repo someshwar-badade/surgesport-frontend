@@ -1,8 +1,15 @@
 import apiClient from "~/api/apiClient"
 
+//prpcedire interface
+export interface Procedure {
+  id: number
+  name: string
+}
+
 export interface Video {
   id: string
-  procedure_type?: string
+  procedure_id?: number | string
+  procedure?: Procedure
   title?: string
   total_video_time?: string
   first_camera_entry_time?: string
@@ -26,7 +33,7 @@ export interface ApiResponse<T> {
 }
 
 export interface CreateVideoData {
-  procedure_type: string
+  procedure_id: number
   title: string
   total_video_time: string
   video_url: string

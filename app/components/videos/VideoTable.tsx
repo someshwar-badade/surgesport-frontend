@@ -44,7 +44,7 @@ export function VideoTable({
     return safeVideos.filter(
       (v) =>
         (v.title?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
-        (v.procedure_type?.toLowerCase().includes(search.toLowerCase()) ?? false)
+        (v.procedure?.name?.toLowerCase().includes(search.toLowerCase()) ?? false)
     )
   }, [search, safeVideos])
 
@@ -87,7 +87,7 @@ export function VideoTable({
           {paged.map((v) => (
             <TableRow key={v.id}>
               <TableCell>{v.title || "N/A"}</TableCell>
-              <TableCell>{v.procedure_type || "N/A"}</TableCell>
+              <TableCell>{v.procedure?.name || "N/A"}</TableCell>
               <TableCell>{v.total_video_time_formatted ? `${v.total_video_time_formatted}` : "N/A"}</TableCell>
               <TableCell>
                 {v.video_url ? (

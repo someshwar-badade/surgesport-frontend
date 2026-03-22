@@ -19,6 +19,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog"
+import { Pencil, Trash } from "lucide-react"
+import { Button } from "../ui/button"
 
 interface VideoTableProps {
   readonly videos: Video[]
@@ -106,6 +108,7 @@ export function VideoTable({
               <TableCell>
                 {v.created_at ? new Date(v.created_at).toLocaleDateString() : "N/A"}
               </TableCell>
+              
               <TableCell>
                 <div className="flex gap-2">
                   {/* {onView && (
@@ -117,17 +120,18 @@ export function VideoTable({
                     </button>
                   )} */}
                   {onEdit && (
-                    <button
+                    <Button  size="sm"
+          variant="outline"
                       onClick={() => onEdit(v.id)}
-                      className="text-green-600 hover:underline"
                     >
-                      Edit
-                    </button>
+                      <Pencil className="w-4 h-4" />
+                    </Button>
                   )}
                   {onDelete && (
                     <AlertDialog>
   <AlertDialogTrigger asChild>
-    <button className="text-red-500">Delete</button>
+    <Button size="sm"
+          variant="destructive"  ><Trash className="w-4 h-4" /></Button>
   </AlertDialogTrigger>
 
   <AlertDialogContent>

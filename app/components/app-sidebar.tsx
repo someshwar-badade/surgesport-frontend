@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { IconDashboard, IconFolder, IconHighlight, IconInnerShadowTop, IconUsers } from "@tabler/icons-react"
+import { IconDashboard, IconFolder, IconHighlight, IconInnerShadowTop, IconUsers, IconRoute   } from "@tabler/icons-react"
 
 import { useAuth } from "~/context/authContext"
 import { isAdmin, isResearcher, isStudent } from "~/lib/roles"
@@ -38,6 +38,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "Annotations",
           url: "/videos/annotation",
           icon: IconHighlight,
+        },
+         {
+          title: "Procedures",
+          url: "/procedures",
+          icon: IconRoute  ,
         },
         {
           title: "Users",

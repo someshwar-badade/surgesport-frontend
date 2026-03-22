@@ -4,6 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Field } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
+import apiClient from "~/api/apiClient"
+
+interface Procedure {
+  id: string | number
+  name: string
+}
 
 interface VideoFormProps {
   readonly initialData?: Partial<Video>
@@ -11,16 +17,16 @@ interface VideoFormProps {
   readonly onCancel?: () => void
 }
 
-const PROCEDURE_OPTIONS = ["Endoscopy", "Colonoscopy", "ERCP", "Other"]
-
 export function VideoForm({
   initialData = {},
   onSubmit,
   onCancel,
 }: VideoFormProps) {
-  const [procedureType, setProcedureType] = React.useState(
-    initialData.procedure_type || PROCEDURE_OPTIONS[0]
+  const [procedures, setProcedures] = React.useState<Procedure[]>([])
+  const [procedureId, setProcedureId] = React.useState(
+    initialData.procedure_id?.toString() || ""
   )
+  const [loading, setLoading] = React.useState(true)
   const [title, setTitle] = React.useState(initialData.title || "")
   const [totalVideoTime, setTotalVideoTime] = React.useState(
     initialData.total_video_time || ""
@@ -45,6 +51,28 @@ export function VideoForm({
 
   const [errors, setErrors] = React.useState<Record<string, string>>({})
 
+  // Fetch procedures from API on component mount
+  React.useEffect(() => {
+    const fetchProcedures = async () => {
+      try {
+        const response = await apiClient.get("/procedures")
+        setProcedures(response.data.data || [])
+        // Set first procedure as default if not provided
+        if (!initialData.procedure_id && response.data.data?.length > 0) {
+          setProcedureId(response.data.data[0].id.toString())
+        }
+      } catch (error) {
+        console.error("Failed to fetch procedures:", error)
+        // Fallback to empty array if API fails
+        setProcedures([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProcedures()
+  }, [])
+
   const isValidTime = (value: string) => {
     if (!value) return true
     // Accept HH:MM:SS (24hr) format
@@ -63,7 +91,7 @@ export function VideoForm({
 
   const validate = () => {
     const errs: Record<string, string> = {}
-    if (!procedureType) errs.procedure_type = "Procedure type is required"
+    if (!procedureId) errs.procedure_id = "Procedure type is required"
     if (!title) errs.title = "Title is required"
     if (!totalVideoTime) {
       errs.total_video_time = "Total video time is required"
@@ -104,7 +132,7 @@ export function VideoForm({
     e.preventDefault()
     if (!validate()) return
     onSubmit({
-      procedure_type: procedureType,
+      procedure_id: Number(procedureId),
       title: title,
       total_video_time: totalVideoTime,
       first_camera_entry_time: firstCameraEntryTime || undefined,
@@ -154,18 +182,22 @@ const handleTimeChange = (
             <Field>
               <label className="text-sm font-medium">Procedure Type</label>
               <select
-                value={procedureType}
-                onChange={(e) => setProcedureType(e.target.value)}
+                value={procedureId}
+                onChange={(e) => setProcedureId(e.target.value)}
+                disabled={loading}
                 className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
               >
-                {PROCEDURE_OPTIONS.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
+                <option value="" disabled>
+                  {loading ? "Loading procedures..." : "Select a procedure"}
+                </option>
+                {procedures.map((proc) => (
+                  <option key={proc.id} value={proc.id.toString()}>
+                    {proc.name}
                   </option>
                 ))}
               </select>
-              {errors.procedure_type && (
-                <p className="mt-1 text-xs text-red-500">{errors.procedure_type}</p>
+              {errors.procedure_id && (
+                <p className="mt-1 text-xs text-red-500">{errors.procedure_id}</p>
               )}
             </Field>
 

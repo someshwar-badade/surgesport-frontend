@@ -9,6 +9,7 @@ export default [
   // Public routes
   index("routes/home.tsx"),
   route("login", "routes/login/page.tsx"),
+  route("forgot-password", "routes/forgot-password/page.tsx"),
   route("register", "routes/register/page.tsx"),
   // Protected routes with their own layout
   layout("routes/protectedLayout.tsx", [

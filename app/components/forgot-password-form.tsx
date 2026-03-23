@@ -1,5 +1,4 @@
 import { cn } from "~/lib/utils"
-import { getDefaultRouteForRole } from "~/lib/roles"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
 import {
@@ -7,33 +6,31 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { useState } from "react"
 import useAuthActions from "~/hooks/useAuthActions"
-import { useNavigate } from "react-router"
 
-export function LoginForm({
+export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { error, userLogin, loading } = useAuthActions()
-  const navigate = useNavigate()
+  const { forgotPassword, loading, error } = useAuthActions()
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  })
+  const [email, setEmail] = useState("")
+  const [success, setSuccess] = useState("")
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    const res = await userLogin(form)
+    try {
+      const res = await forgotPassword(email)
 
-    if (res) {
-      const roleId = (res as any)?.user?.role_id
-      navigate(getDefaultRouteForRole(roleId))
+      if (res) {
+        setSuccess("Password reset link sent to your email")
+      }
+    } catch (err: any) {
+      console.error(err)
     }
   }
 
@@ -44,48 +41,52 @@ export function LoginForm({
           <form onSubmit={handleSubmit} className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <h1 className="text-2xl font-bold">Forgot Password</h1>
                 <p className="text-balance text-muted-foreground">
-                  Login to your Surgesport account
+                  Enter your email to receive a reset link
                 </p>
               </div>
+
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </Field>
+
+              {/* Error */}
+              {error && (
+                <p className="text-sm text-red-500 text-center">{error}</p>
+              )}
+
+              {/* Success */}
+              {success && (
+                <p className="text-sm text-green-500 text-center">
+                  {success}
+                </p>
+              )}
+
               <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="/forgot-password"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
-                  required
-                />
+                <Button type="submit" disabled={loading} className="w-full">
+                  {loading ? "Sending..." : "Send Reset Link"}
+                </Button>
               </Field>
-              <Field>
-                <Button type="submit">Login</Button>
-              </Field>
+
               <FieldDescription className="text-center">
-                Don&apos;t have an account? <a href="register">Sign up</a>
+                Remember your password?{" "}
+                <a href="/login" className="underline">
+                  Login
+                </a>
               </FieldDescription>
             </FieldGroup>
           </form>
+
+          {/* Image Section */}
           <div className="relative hidden bg-muted md:block">
             <img
               src="/Login-amico.png"

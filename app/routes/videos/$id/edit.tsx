@@ -1,10 +1,10 @@
 import * as React from "react"
 import { useParams, useNavigate } from "react-router"
 import { getVideoById, updateVideo } from "~/lib/videoService"
-import type { Video, UpdateVideoData } from "~/lib/videoService"
 import { VideoForm } from "~/components/videos/VideoForm"
 import { useToast } from "~/components/ui/toast"
 import { SiteHeader } from "~/components/site-header"
+import type { UpdateVideoData, Video } from "~/types/videos/video.type"
 
 export default function EditVideo() {
   const { id } = useParams()

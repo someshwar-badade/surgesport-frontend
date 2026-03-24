@@ -2,7 +2,7 @@ import * as React from "react"
 import { useParams, useNavigate } from "react-router"
 import { SiteHeader } from "~/components/site-header"
 import { getVideoById } from "~/lib/videoService"
-import type { Video } from "~/lib/videoService"
+import type { Video } from "~/types/videos/video.type"
 
 export default function ViewVideo() {
   const { id } = useParams()
@@ -37,7 +37,7 @@ export default function ViewVideo() {
           </div>
           <div>
             <dt className="font-medium">Procedure Type</dt>
-            <dd>{video.procedure_type}</dd>
+            <dd>{video.procedure?.name}</dd>
           </div>
           <div>
             <dt className="font-medium">Total Video Time</dt>

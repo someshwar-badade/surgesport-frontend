@@ -22,6 +22,12 @@ export default [
       route("videos/annotation/view", "routes/videos/view.tsx"),
       route("videos/:id", "routes/videos/$id/index.tsx"),
       route("videos/:id/edit", "routes/videos/$id/edit.tsx"),
+
+       route("users/all", "routes/users/index.tsx"),
+      route("users/create", "routes/users/create.tsx"),
+      route("users/:id/edit", "routes/users/$id/edit.tsx"),
+
+
     ]),
   ]),
 ] satisfies RouteConfig

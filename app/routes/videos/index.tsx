@@ -1,11 +1,11 @@
 import * as React from "react"
 import { Link, useNavigate } from "react-router"
 import { getVideos, deleteVideo } from "~/lib/videoService"
-import type { Video } from "~/lib/videoService"
 import { VideoTable } from "~/components/videos/VideoTable"
 import { useToast } from "~/components/ui/toast"
 import { SiteHeader } from "~/components/site-header"
 import { Button } from "~/components/ui/button"
+import type { Video } from "~/types/videos/video.type"
 
 export default function VideoList() {
   const [videos, setVideos] = React.useState<Video[]>([])

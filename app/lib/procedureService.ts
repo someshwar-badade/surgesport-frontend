@@ -1,14 +1,9 @@
 import apiClient from "~/api/apiClient"
+import type { ApiResponse } from "~/types/apis/apiResponse.type"
 import type { Procedure } from "~/types/procedure.type"
+import { extractList } from "~/utils/helpers/extractListHelper"
 
 
-
-export interface ApiResponse<T> {
-  status: boolean
-  message?: string
-  data: T
-  errors?: Record<string, string[]>
-}
 export async function getProcedures(): Promise<Procedure[]> {
   const response = await apiClient.get<ApiResponse<unknown>>("/procedures")
 
@@ -16,25 +11,7 @@ export async function getProcedures(): Promise<Procedure[]> {
     throw new Error(response.data.message || "Failed to fetch procedures")
   }
 
-  const payload = response.data.data
-
-  // Normalize response payload
-  if (Array.isArray(payload)) {
-    return payload as Procedure[]
-  }
-
-  if (payload && typeof payload === "object") {
-    if (Array.isArray((payload as any).procedures)) {
-      return (payload as any).procedures as Procedure[]
-    }
-
-    if (Array.isArray((payload as any).data)) {
-      return (payload as any).data as Procedure[]
-    }
-  }
-
-  console.warn("Unexpected procedures payload format", payload)
-  return []
+  return extractList<Procedure>(response.data.data);
 }
 
 export async function createProcedure(

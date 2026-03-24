@@ -1,7 +1,7 @@
 import { useState } from "react"
 import apiClient from "~/api/apiClient"
 import { useAuth } from "~/context/authContext"
-import type { LoginData, RegisterData, ApiError } from "~/types/auth.type"
+import type { LoginCredentials, RegisterData, ApiError } from "~/types/auth.type"
 
 const useAuthActions = () => {
   const [loading, setLoading] = useState<boolean>(false)
@@ -9,7 +9,7 @@ const useAuthActions = () => {
 
   const { user, login, logout } = useAuth()
 
-  const userLogin = async (data: LoginData) => {
+  const userLogin = async (data: LoginCredentials) => {
     try {
       setLoading(true)
       setError(null)

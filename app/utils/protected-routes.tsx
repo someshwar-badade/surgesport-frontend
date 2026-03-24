@@ -15,7 +15,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   const roleId = user.role_id
-  if (!isPathAllowedForRole(roleId, location.pathname)) {
+  if (!isPathAllowedForRole(roleId as number, location.pathname)) {
     // Redirect users to the first page they can access.
     return <Navigate to={getDefaultRouteForRole(roleId)} replace />
   }

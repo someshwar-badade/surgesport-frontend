@@ -1,6 +1,7 @@
+
 // types/auth.types.ts
 export interface User {
-  id: string | number
+  id: number
   name: string
   email: string
   /**
@@ -10,7 +11,21 @@ export interface User {
   role_id?: number
 }
 
-export interface LoginData {
+export interface UserRole {
+  id: number;
+  name?: string;
+  display_name?: string;
+}
+
+export interface UserWithRole {
+  id:  number
+  name: string
+  email: string
+  role?: UserRole
+  created_at? : string
+}
+
+export interface LoginCredentials {
   email: string
   password: string
 }
@@ -25,7 +40,20 @@ export interface RegisterData {
   email: string
   password: string
   password_confirmation?: string
-  role_id?: number | string
+  role?: string
+}
+
+export interface UserUpdateData {
+  name: string
+  email: string
+  password?: string
+  password_confirmation?: string
+  role?: number | string
+}
+
+export interface RegisterResponse {
+  user: User
+  token: string
 }
 
 export interface AuthContextType {
@@ -42,4 +70,23 @@ export interface ApiError {
     message?: string
   }
   message?: string
+}
+
+export interface ForgotPasswordData {
+  email: string
+}
+
+export interface ResetPasswordData {
+  email: string
+  token: string
+  password: string
+  password_confirmation: string
+}
+
+
+export interface UserCreate {
+  email: string
+  token: string
+  password: string
+  password_confirmation: string
 }

@@ -1,32 +1,6 @@
 import apiClient from "~/api/apiClient"
-
-export interface ApiResponse<T> {
-  status: boolean
-  message?: string
-  data: T
-  errors?: Record<string, string[]>
-}
-
-export interface BleedingAnnotation {
-  id: number
-  onset_time: number
-  severity: string
-  intervention_time?: number
-  x_position: number
-  y_position: number
-  created_at?: string
-  updated_at?: string
-}
-
-export interface CreateBleedingAnnotationData {
-  onset_time: number
-  severity: string
-  intervention_time?: number
-  x_position: number
-  y_position: number
-}
-
-export interface UpdateBleedingAnnotationData extends Partial<CreateBleedingAnnotationData> {}
+import type { ApiResponse } from "~/types/apis/apiResponse.type"
+import type { BleedingAnnotation, CreateBleedingAnnotationData, UpdateBleedingAnnotationData } from "~/types/bleedings/bleedings.type"
 
 export async function getBleedingAnnotations(videoId: string): Promise<BleedingAnnotation[]> {
   const response = await apiClient.get<ApiResponse<BleedingAnnotation[]>>(`/videos/${videoId}/bleedings`)

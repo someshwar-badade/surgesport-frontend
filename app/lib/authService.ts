@@ -1,50 +1,6 @@
 import apiClient from "~/api/apiClient"
-
-export interface LoginCredentials {
-  email: string
-  password: string
-}
-
-export interface RegisterData {
-  name: string
-  email: string
-  password: string
-  password_confirmation: string
-}
-
-export interface User {
-  id: number
-  name: string
-  email: string
-  role_id?: number
-}
-
-export interface ApiResponse<T> {
-  status: boolean
-  message?: string
-  data: T
-  errors?: Record<string, string[]>
-}
-
-export interface LoginResponse {
-  token: string
-}
-
-export interface RegisterResponse {
-  user: User
-  token: string
-}
-
-export interface ForgotPasswordData {
-  email: string
-}
-
-export interface ResetPasswordData {
-  email: string
-  token: string
-  password: string
-  password_confirmation: string
-}
+import type { ApiResponse } from "~/types/apis/apiResponse.type";
+import type { ForgotPasswordData, LoginCredentials, LoginResponse, RegisterData, RegisterResponse, ResetPasswordData, User } from "~/types/auth.type";
 
 export async function login(credentials: LoginCredentials): Promise<string> {
   const response = await apiClient.post<ApiResponse<LoginResponse>>("/login", credentials)

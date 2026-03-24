@@ -8,7 +8,7 @@ import {
   FieldLabel,
 } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import useAuthActions from "~/hooks/useAuthActions"
 import { useNavigate } from "react-router"
 import {
@@ -18,6 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select"
+import type { RegisterData } from "~/types/auth.type"
+import apiClient from "~/api/apiClient"
+
+type Role = {
+  id: string
+  name: string
+}
 
 export function RegisterForm({
   className,
@@ -25,18 +32,47 @@ export function RegisterForm({
 }: React.ComponentProps<"div">) {
   const { error, userRegister, loading } = useAuthActions()
   const navigate = useNavigate()
-
-  const [form, setForm] = useState({
+  const [roles, setRoles] = useState<Role[]>([])
+  const [form, setForm] = useState<RegisterData>({
     name: "",
     email: "",
     password: "",
     password_confirmation: "",
-    // Default to student role
-    role_id: "2",
+    role: "",
   })
+
+  // Fetch roles
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await apiClient.get("/roles")
+        const roleData = res.data.data || []
+        setRoles(roleData)
+
+        // Set default role if available and not already set
+        if (roleData.length > 0 && !form.role) {
+          setForm(prev => ({
+            ...prev,
+            role: roleData[0].id.toString(),
+          }))
+        }
+      } catch (error) {
+        console.error("Failed to fetch roles:", error)
+      }
+    }
+
+    fetchRoles()
+  }, []) // Empty dependency array - only runs on mount
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    
+    // Optional: Add password confirmation validation
+    if (form.password !== form.password_confirmation) {
+      // Handle password mismatch error
+      console.error("Passwords do not match")
+      return
+    }
 
     const res = await userRegister(form)
 
@@ -67,6 +103,7 @@ export function RegisterForm({
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
+                  disabled={loading}
                 />
               </Field>
 
@@ -79,6 +116,7 @@ export function RegisterForm({
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
+                  disabled={loading}
                 />
               </Field>
 
@@ -93,6 +131,7 @@ export function RegisterForm({
                     setForm({ ...form, password: e.target.value })
                   }}
                   required
+                  disabled={loading}
                 />
               </Field>
 
@@ -109,24 +148,28 @@ export function RegisterForm({
                     setForm({ ...form, password_confirmation: e.target.value })
                   }}
                   required
+                  disabled={loading}
                 />
               </Field>
 
               <Field>
                 <FieldLabel htmlFor="role">Role</FieldLabel>
                 <Select
-                  value={form.role_id}
+                  value={form.role}
                   onValueChange={(value) =>
-                    setForm({ ...form, role_id: value })
+                    setForm({ ...form, role: value })
                   }
+                  disabled={loading || roles.length === 0}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Admin</SelectItem>
-                    <SelectItem value="2">Student</SelectItem>
-                    <SelectItem value="3">Researcher</SelectItem>
+                    {roles.map((role) => (
+                      <SelectItem key={role.id} value={role.id.toString()}>
+                        {role.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>

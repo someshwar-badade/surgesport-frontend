@@ -1,34 +1,7 @@
 import apiClient from "~/api/apiClient"
+import type { ApiResponse } from "~/types/apis/apiResponse.type"
+import type { CreateInstrumentationAnnotationData, InstrumentationAnnotation, UpdateInstrumentationAnnotationData } from "~/types/instruments/instruments.type"
 
-export interface ApiResponse<T> {
-  status: boolean
-  message?: string
-  data: T
-  errors?: Record<string, string[]>
-}
-
-export interface InstrumentationAnnotation {
-  id: number
-  timestamp?: number
-  instrument: string
-  action: string
-  x_position?: number
-  y_position?: number
-  duration?: number
-  created_at?: string
-  updated_at?: string
-}
-
-export interface CreateInstrumentationAnnotationData {
-  timestamp?: number
-  instrument: string
-  action: string
-  x_position?: number
-  y_position?: number
-  duration?: number
-}
-
-export interface UpdateInstrumentationAnnotationData extends Partial<CreateInstrumentationAnnotationData> {}
 
 export async function getInstrumentationAnnotations(videoId: string): Promise<InstrumentationAnnotation[]> {
   const response = await apiClient.get<ApiResponse<InstrumentationAnnotation[]>>(`/videos/${videoId}/instruments`)

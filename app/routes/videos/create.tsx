@@ -1,10 +1,10 @@
 import * as React from "react"
 import { useNavigate } from "react-router"
 import { createVideo } from "~/lib/videoService"
-import type { CreateVideoData } from "~/lib/videoService"
 import { VideoForm } from "~/components/videos/VideoForm"
 import { useToast } from "~/components/ui/toast"
 import { SiteHeader } from "~/components/site-header"
+import type { CreateVideoData } from "~/types/videos/video.type"
 
 export default function CreateVideo() {
   const navigate = useNavigate()

@@ -15,6 +15,7 @@ export default [
   layout("routes/protectedLayout.tsx", [
     layout("routes/layout.tsx", [
       route("dashboard", "routes/dashboard.tsx"),
+       route("data-analysis", "routes/data-analysis.tsx"),
       route("procedures", "routes/procedures/index.tsx"),
       route("videos", "routes/videos/index.tsx"),
       route("videos/create", "routes/videos/create.tsx"),

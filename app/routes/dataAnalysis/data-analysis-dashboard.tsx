@@ -1,13 +1,12 @@
 // src/components/data-analysis-dashboard.tsx
 "use client"
 
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { getVideos } from "~/lib/videoService"
 import { getAnnotationsByVideoId } from "~/lib/annotationService"
 import type { Video } from "~/types/videos/video.type"
-import type { Annotation } from "~/types/annotation.type"
 import { 
   BarChart, 
   Bar, 
@@ -107,7 +106,7 @@ export function DataAnalysisDashboard() {
           totalInstruments += instruments
           totalAnomalies += anomalies
           
-          // Flatten annotations with proper mapping to ExtendedAnnotation
+          // Flatten annotations for ExtendedAnnotation
           const flatAnnotations: ExtendedAnnotation[] = [
             ...annotations.phases.map(p => ({ 
               ...p, 
@@ -310,7 +309,7 @@ export function DataAnalysisDashboard() {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
                         outerRadius={120}
                         fill="#8884d8"
                         dataKey="value"
@@ -428,7 +427,7 @@ export function DataAnalysisDashboard() {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
                         outerRadius={120}
                         fill="#8884d8"
                         dataKey="value"

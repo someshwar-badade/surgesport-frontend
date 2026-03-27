@@ -7,6 +7,7 @@ import type {
   InstrumentationAnnotation,
   AnomalyAnnotation,
 } from "~/types/annotation.type"
+import type { Procedure } from "./videoService"
 
 export interface ApiResponse<T> {
   status: boolean
@@ -23,88 +24,38 @@ export interface AnnotationsByType {
   anomaly: AnomalyAnnotation[]
 }
 
-const makeDummyPhaseAnnotations = (count = 12): PhaseAnnotation[] => {
-  const names = [
-    "Preparation",
-    "Incision",
-    "Dissection",
-    "Hemostasis",
-    "Resection",
-    "Suturing",
-    "Inspection",
-    "Closure",
-    "Recovery",
-    "Final Check",
-  ]
 
-  return Array.from({ length: count }, (_, idx) => ({
-    id: idx + 1,
-    phase_name: names[idx % names.length],
-    start_time: idx * 50,
-    end_time: idx * 50 + 40,
-    created_at: new Date(Date.now() - (count - idx) * 60000).toISOString(),
-    updated_at: new Date(Date.now() - (count - idx) * 60000).toISOString(),
-  }))
+
+
+export interface Video {
+  id: string
+  procedure_id?: number | string
+  procedure?: Procedure
+  title?: string
+  total_video_time?: string
+  first_camera_entry_time?: string
+  final_camera_exit_time?: string
+  camera_enter_body_timestamp?: string
+  camera_exit_body_timestamp?: string
+  osat_score?: number
+  video_url?: string
+  created_at?: string
+  updated_at?: string
+  total_video_time_formatted?: string
+  first_camera_entry_time_formatted?: string
+  final_camera_exit_time_formatted?: string
+  annotations: {
+  id: number,
+  video_id: string,
+  phases_count: number,
+  events_count: number,
+  bleeds_count: number,
+  instruments_count: number,
+  anomalies_count: number
+
+}
 }
 
-const makeDummyEventAnnotations = (count = 12): EventAnnotation[] => {
-  const events = [
-    "Bleeding Started",
-    "Suturing Started",
-    "Instrument Change",
-    "Camera Obstruction",
-    "Unexpected Motion",
-    "Tissue Adhesion",
-    "Pressure Applied",
-    "Alarm Triggered",
-    "Equipment Check",
-    "Gas Leak",
-    "Communication",
-    "Fastened",
-  ]
-
-  return Array.from({ length: count }, (_, idx) => ({
-    id: idx + 1,
-    event_type: events[idx % events.length],
-    timestamp: idx * 30,
-    x_position: 30 + (idx % 8) * 6,
-    y_position: 40 + (idx % 6) * 7,
-    created_at: new Date(Date.now() - (count - idx) * 50000).toISOString(),
-    updated_at: new Date(Date.now() - (count - idx) * 50000).toISOString(),
-  }))
-}
-
-const makeDummyBleedingAnnotations = (count = 12): BleedingAnnotation[] => {
-  const severities = ["mild", "moderate", "severe"]
-
-  return Array.from({ length: count }, (_, idx) => ({
-    id: idx + 1,
-    onset_time: idx * 40,
-    severity: severities[idx % severities.length],
-    intervention_time: idx * 40 + 15,
-    x_position: 25 + (idx % 5) * 10,
-    y_position: 35 + (idx % 5) * 10,
-    created_at: new Date(Date.now() - (count - idx) * 45000).toISOString(),
-    updated_at: new Date(Date.now() - (count - idx) * 45000).toISOString(),
-  }))
-}
-
-const makeDummyInstrumentationAnnotations = (count = 12): InstrumentationAnnotation[] => {
-  const instruments = ["Scalpel", "Forceps", "Suction", "Cautery", "Needle Holder", "Retractor", "Clip Applier", "Grasper", "Stapler", "Irrigator", "Endoscope", "Trocar"]
-  const positions: ("LEFT" | "CENTER" | "RIGHT")[] = ["LEFT", "CENTER", "RIGHT"]
-
-  return Array.from({ length: count }, (_, idx) => ({
-    id: idx + 1,
-    instrument_name: instruments[idx % instruments.length],
-    position: positions[idx % positions.length],
-    start_time: idx * 45,
-    end_time: idx * 45 + 20,
-    x_position: 20 + (idx % 7) * 9,
-    y_position: 25 + (idx % 7) * 8,
-    created_at: new Date(Date.now() - (count - idx) * 55000).toISOString(),
-    updated_at: new Date(Date.now() - (count - idx) * 55000).toISOString(),
-  }))
-}
 
 export async function getAnnotationsByVideoId(
   videoId: string,
@@ -209,13 +160,13 @@ export async function createAnomalyAnnotation(
   return response.data.data
 }
 
-export async function createAnnotation(videoId: string, type: string, data: any): Promise<any> {
-  const response = await apiClient.post<ApiResponse<any>>(`/videos/${videoId}/annotations`, { type, data })
-  if (!response.data.status) {
-    throw new Error(response.data.message || "Failed to create annotation")
-  }
-  return response.data.data
-}
+// export async function createAnnotation(videoId: string, type: string, data: any): Promise<any> {
+//   const response = await apiClient.post<ApiResponse<any>>(`/videos/${videoId}/annotations`, { type, data })
+//   if (!response.data.status) {
+//     throw new Error(response.data.message || "Failed to create annotation")
+//   }
+//   return response.data.data
+// }
 
 export async function updateAnnotation(
   videoId: string,
@@ -255,4 +206,50 @@ export async function getAnnotation(videoId: string, annotationId: number): Prom
   }
   return response.data.data
 }
+
+export async function getAnnotatorAnnotations(): Promise<Video[]> {
+  const response = await apiClient.get<ApiResponse<unknown>>(
+    `/annotator/annotations`
+  )
+  if (!response.data.status) {
+      throw new Error(response.data.message || "Failed to fetch videos")
+    }
+  
+    const payload = response.data.data
+    console.log("Raw annotations payload:", payload) // Debug log
+    // Normalize response payload to an array of videos.
+    if (Array.isArray(payload)) {
+      return payload as Video[]
+    }
+  
+    if (payload && typeof payload === "object") {
+      // Some APIs wrap list data in a `videos` or `data` key
+      if (Array.isArray((payload as any).videos)) {
+        return (payload as any).videos as Video[]
+      }
+      if (Array.isArray((payload as any).data)) {
+        return (payload as any).data as Video[]
+      }
+    }
+  
+    // Fallback: return empty list and log to help debugging
+    console.warn("Unexpected videos payload format", payload)
+    return [];
+}
+
+export async function createAnnotation(videoId: string): Promise<{ id: string }> {
+  const response = await apiClient.post<ApiResponse<{ id: string }>>(
+    `/videos/${videoId}/annotations`,
+    {
+      video_id: videoId, // optional (you can remove if backend doesn't need it)
+    }
+  )
+
+  if (!response.data.status) {
+    throw new Error(response.data.message || "Failed to create annotation")
+  }
+
+  return response.data.data
+}
+
 

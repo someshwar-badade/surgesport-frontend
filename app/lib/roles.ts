@@ -36,7 +36,7 @@ export const isPathAllowedForRole = (role: number | string | null, path: string)
 
   if (isStudent(role)) {
     // Students only have access to the annotations pages.
-    const allowedPaths = ["/dashboard","/videos/annotation", "/videos/annotation/view"]
+    const allowedPaths = ["/dashboard","/videos/annotation", "/videos/annotation/view","/annotator/annotations"]
     return allowedPaths.some((p) => normalizedPath === p || normalizedPath.startsWith(`${p}/`))
   }
 

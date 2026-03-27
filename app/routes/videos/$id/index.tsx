@@ -37,7 +37,7 @@ export default function ViewVideo() {
           </div>
           <div>
             <dt className="font-medium">Procedure Type</dt>
-            <dd>{video.procedure_type}</dd>
+            <dd>{video.procedure?.name}</dd>
           </div>
           <div>
             <dt className="font-medium">Total Video Time</dt>

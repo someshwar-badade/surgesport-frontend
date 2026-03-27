@@ -22,6 +22,8 @@ export default [
       route("videos/annotation/view", "routes/videos/view.tsx"),
       route("videos/:id", "routes/videos/$id/index.tsx"),
       route("videos/:id/edit", "routes/videos/$id/edit.tsx"),
+
+      route("annotator/annotations", "routes/annotator/annotations/index.tsx"),
     ]),
   ]),
 ] satisfies RouteConfig

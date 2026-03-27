@@ -5,6 +5,7 @@ export interface PhaseAnnotation {
   phase_name: string
   start_time: number
   end_time?: number
+  duration?: number
   created_at?: string
   updated_at?: string
 }

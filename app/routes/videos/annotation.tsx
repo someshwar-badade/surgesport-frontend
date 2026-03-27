@@ -161,6 +161,7 @@ export default function Annotation() {
             phase_name: annotation.phaseName,
             start_time: annotation.time,
             end_time: annotation.endTime,
+            duration: annotation.duration,
           })
           break
         case "events":

@@ -1,28 +1,6 @@
 import apiClient from "~/api/apiClient"
-
-export interface ApiResponse<T> {
-  status: boolean
-  message?: string
-  data: T
-  errors?: Record<string, string[]>
-}
-
-export interface EventAnnotation {
-  id: number
-  event_type: string
-  x_position: number
-  y_position: number
-  created_at?: string
-  updated_at?: string
-}
-
-export interface CreateEventAnnotationData {
-  event_type: string
-  x_position: number
-  y_position: number
-}
-
-export interface UpdateEventAnnotationData extends Partial<CreateEventAnnotationData> {}
+import type { ApiResponse } from "~/types/apis/apiResponse.type"
+import type { CreateEventAnnotationData, EventAnnotation, UpdateEventAnnotationData } from "~/types/events/events.type"
 
 export async function getEventAnnotations(videoId: string): Promise<EventAnnotation[]> {
   const response = await apiClient.get<ApiResponse<EventAnnotation[]>>(`/videos/${videoId}/events`)

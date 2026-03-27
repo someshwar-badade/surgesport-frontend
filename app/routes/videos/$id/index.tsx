@@ -2,7 +2,7 @@ import * as React from "react"
 import { useParams, useNavigate } from "react-router"
 import { SiteHeader } from "~/components/site-header"
 import { getVideoById } from "~/lib/videoService"
-import type { Video } from "~/lib/videoService"
+import type { Video } from "~/types/videos/video.type"
 
 export default function ViewVideo() {
   const { id } = useParams()

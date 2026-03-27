@@ -1,10 +1,10 @@
 import * as React from "react"
-import type { Video, CreateVideoData } from "~/lib/videoService"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Field } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import apiClient from "~/api/apiClient"
+import type { CreateVideoData, Video } from "~/types/videos/video.type"
 
 interface Procedure {
   id: string | number

@@ -23,6 +23,12 @@ export interface AnnotationsByType {
   instrumentation: InstrumentationAnnotation[]
   anomaly: AnomalyAnnotation[]
 }
+import type { Annotation, AnnotationsByType } from "~/types/annotation.type"
+import type { ApiResponse } from "~/types/apis/apiResponse.type"
+import type { BleedingAnnotation } from "~/types/bleedings/bleedings.type"
+import type { EventAnnotation } from "~/types/events/events.type"
+import type { InstrumentationAnnotation } from "~/types/instruments/instruments.type"
+import type { PhaseAnnotation } from "~/types/phases/phases.type"
 
 
 

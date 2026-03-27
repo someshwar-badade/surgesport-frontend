@@ -1,28 +1,6 @@
 import apiClient from "~/api/apiClient"
-
-export interface ApiResponse<T> {
-  status: boolean
-  message?: string
-  data: T
-  errors?: Record<string, string[]>
-}
-
-export interface PhaseAnnotation {
-  id: number
-  phase_name: string
-  start_time: number
-  end_time?: number
-  created_at?: string
-  updated_at?: string
-}
-
-export interface CreatePhaseAnnotationData {
-  phase_name: string
-  start_time: number
-  end_time: number
-}
-
-export interface UpdatePhaseAnnotationData extends Partial<CreatePhaseAnnotationData> {}
+import type { ApiResponse } from "~/types/apis/apiResponse.type"
+import type { CreatePhaseAnnotationData, PhaseAnnotation, UpdatePhaseAnnotationData } from "~/types/phases/phases.type"
 
 export async function getPhaseAnnotations(videoId: string): Promise<PhaseAnnotation[]> {
   const response = await apiClient.get<ApiResponse<PhaseAnnotation[]>>(`/videos/${videoId}/phases`)

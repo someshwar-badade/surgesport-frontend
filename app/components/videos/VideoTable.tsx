@@ -1,5 +1,4 @@
 import * as React from "react"
-import type { Video } from "~/lib/videoService"
 import {
   Table,
   TableHeader,
@@ -21,6 +20,7 @@ import {
 } from "~/components/ui/alert-dialog"
 import { Pencil, Trash } from "lucide-react"
 import { Button } from "../ui/button"
+import type { Video } from "~/types/videos/video.type"
 
 interface VideoTableProps {
   readonly videos: Video[]

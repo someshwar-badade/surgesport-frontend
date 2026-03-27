@@ -7,8 +7,14 @@ import { Card, CardContent } from "~/components/ui/card"
 import { AnnotationTimeline } from "~/components/videos/AnnotationTimeline"
 import { useState, useEffect } from "react"
 import { getAnnotationsByVideoId } from "~/lib/annotationService"
-import { getVideos, type Video } from "~/lib/videoService"
-import type { PhaseAnnotation, EventAnnotation, BleedingAnnotation, InstrumentationAnnotation, Annotation,AnomalyAnnotation } from "~/types/annotation.type"
+import type { PhaseAnnotation } from "~/types/phases/phases.type"
+import type { EventAnnotation } from "~/types/events/events.type"
+import type { BleedingAnnotation } from "~/types/bleedings/bleedings.type"
+import type { InstrumentationAnnotation } from "~/types/instruments/instruments.type"
+import type { AnomalyAnnotation } from "~/types/anomalies/anomalies.type"
+import type { Annotation } from "~/types/annotation.type"
+import type { Video } from "~/types/videos/video.type"
+import { getVideos } from "~/lib/videoService"
 
 // Mock video data for 10 min duration - updated to match new Video interface
 const mockVideo = {
@@ -61,7 +67,6 @@ const convertToLegacyAnnotations = (
       id: `event-${event.id}`,
       video_id: videoId,
       timestamp: event.created_at || new Date().toISOString(),
-      time: event.timestamp,
       x: event.x_position,
       y: event.y_position,
       xPercent: (event.x_position / 1920) * 100,

@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
-import type { Video } from "~/lib/videoService"
+import type { Video } from "~/types/videos/video.type"
 
 interface VideoDetailsProps {
   readonly video?: Video
@@ -35,7 +35,7 @@ export function VideoDetails({ video }: VideoDetailsProps) {
             <div className="text-sm font-medium text-muted-foreground">
               Procedure Type
             </div>
-            <p className="text-sm font-semibold">{video.procedure_type || "N/A"}</p>
+            <p className="text-sm font-semibold">{video.procedure?.name || "N/A"}</p>
           </div>
 
           <div>

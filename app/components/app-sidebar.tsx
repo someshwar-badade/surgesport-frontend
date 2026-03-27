@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { IconDashboard, IconFolder, IconHighlight, IconInnerShadowTop, IconUsers, IconRoute   } from "@tabler/icons-react"
+import { IconDashboard, IconFolder, IconHighlight, IconInnerShadowTop, IconUsers, IconRoute, IconGraph   } from "@tabler/icons-react"
 
 import { useAuth } from "~/context/authContext"
 import { isAdmin, isResearcher, isStudent } from "~/lib/roles"
@@ -29,6 +29,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: "/dashboard",
           icon: IconDashboard,
         },
+         {
+          title: "Data Analysis",
+          url: "/data-analysis",
+          icon: IconGraph,
+        },
         {
           title: "Videos",
           url: "/videos",
@@ -46,7 +51,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
         {
           title: "Users",
-          url: "#",
+          url: "/users/all",
           icon: IconUsers,
         },
       ]

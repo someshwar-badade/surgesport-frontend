@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Card, CardContent } from "~/components/ui/card"
 import { NavLink } from "react-router"
 import { Badge } from "~/components/ui/badge"
-import { getVideos, type Video } from "~/lib/videoService"
 import {
   createPhaseAnnotation,
   createEventAnnotation,
@@ -18,6 +17,8 @@ import {
   deleteAnnotation,
 } from "~/lib/annotationService"
 import type { Annotation } from "~/types/annotation.type"
+import { getVideos } from "~/lib/videoService"
+import type { Video } from "~/types/videos/video.type"
 
 export default function Annotation() {
   const [videos, setVideos] = useState<Video[]>([])
@@ -79,7 +80,7 @@ export default function Annotation() {
             id: `event-${e.id}`,
             video_id: selectedVideo.id,
             timestamp: e.created_at || new Date().toISOString(),
-            time: e.timestamp,
+            time: e.created_at,
             x: e.x_position,
             y: e.y_position,
             xPercent: (e.x_position / 1920) * 100,
@@ -160,12 +161,12 @@ export default function Annotation() {
             phase_name: annotation.phaseName,
             start_time: annotation.time,
             end_time: annotation.endTime,
+            duration: annotation.duration,
           })
           break
         case "events":
           await createEventAnnotation(selectedVideo.id, {
             event_type: annotation.eventName,
-            timestamp: annotation.time,
             x_position: annotation.x,
             y_position: annotation.y,
           })

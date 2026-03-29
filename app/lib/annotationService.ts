@@ -1,28 +1,4 @@
 import apiClient from "~/api/apiClient"
-import type {
-  Annotation,
-  PhaseAnnotation,
-  EventAnnotation,
-  BleedingAnnotation,
-  InstrumentationAnnotation,
-  AnomalyAnnotation,
-} from "~/types/annotation.type"
-import type { Procedure } from "./videoService"
-
-export interface ApiResponse<T> {
-  status: boolean
-  message?: string
-  data: T
-  errors?: Record<string, string[]>
-}
-
-export interface AnnotationsByType {
-  phases: PhaseAnnotation[]
-  events: EventAnnotation[]
-  bleeds: BleedingAnnotation[]
-  instrumentation: InstrumentationAnnotation[]
-  anomaly: AnomalyAnnotation[]
-}
 import type { Annotation, AnnotationsByType } from "~/types/annotation.type"
 import type { ApiResponse } from "~/types/apis/apiResponse.type"
 import type { BleedingAnnotation } from "~/types/bleedings/bleedings.type"
@@ -30,13 +6,10 @@ import type { EventAnnotation } from "~/types/events/events.type"
 import type { InstrumentationAnnotation } from "~/types/instruments/instruments.type"
 import type { PhaseAnnotation } from "~/types/phases/phases.type"
 
-
-
-
 export interface Video {
   id: string
   procedure_id?: number | string
-  procedure?: Procedure
+  procedure?: {id: number | string, name: string} 
   title?: string
   total_video_time?: string
   first_camera_entry_time?: string
